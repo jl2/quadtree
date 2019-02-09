@@ -26,6 +26,9 @@
   ()
   (:documentation "A QuadTree class."))
 
+(defgeneric insert (qt point item)
+  (:documentation "Inserts item into qt at point.  Duplicates are allowed."))
+
 (defgeneric qsize (qt)
   (:documentation "Returns the number of points in the quadtree."))
 
@@ -34,9 +37,6 @@
 
 (defgeneric closest (qt point)
   (:documentation "Returns the point and value closest to point, returns nil if the quadtree is empty."))
-
-(defgeneric insert (qt point item)
-  (:documentation "Inserts item into qt at point.  Duplicates are allowed."))
 
 (defgeneric remove-item (qt item)
   (:documentation "Remove item from the quadtree."))
