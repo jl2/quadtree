@@ -30,13 +30,27 @@
 (test insert
   (let ((qt (make-instance 'quadtree)))
 
-    (insert qt (vec3 0.0 0.0 0.0))
+    (insert qt (vec3 0.0 0.0 0.0) 42)
+    (is-true (= (qsize qt) 1) 43)
 
-    (is-true (= (qsize qt) 1))
-
-    (insert qt (vec3 0.0 0.0 0.0))
+    (insert qt (vec3 0.0 0.0 0.0) 44)
     (is-true (= (qsize qt) 2))
 
-    (insert qt (vec3 0.0 1.0 0.0))
+    (insert qt (vec3 0.0 1.0 0.0) 45)
     (is-true (= (qsize qt) 3))))
+
+
+(test locate
+  (let ((qt (make-instance 'quadtree)))
+    (insert qt (vec3 0.0 10.0 0.0) 42)
+    (is-true (= (locate qt 42) 42))
+
+    (insert qt (vec3 0.0 10.0 -10.0) 142)
+    (is-true (= (locate qt 142) 142))
+
+    (insert qt (vec3 10.0 10.0 -10.0) 42)
+    (is-true (= (locate qt 42) 42))
+
+    (insert qt (vec3 10.0 10.0 -10.0) 42)
+    (is-true (equal (locate qt 42) (list 42 42)))))
 
