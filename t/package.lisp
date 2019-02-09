@@ -54,3 +54,18 @@
     (insert qt (vec3 10.0 10.0 -10.0) 42)
     (is-true (equal (locate qt 42) (list 42 42)))))
 
+(test closest
+  (let ((qt (make-instance 'quadtree)))
+    (is-true (null (closest qt (vec3 0.0 0.0 0.0))))
+
+    (insert qt (vec3 0.0 0.0 0.0) 42)
+    (insert qt (vec3 0.0 10.00 0.0) 47)
+
+    (multiple-value-bind (location value) (closest qt (vec3 0.0 1.0 0.0))
+      (is-true (v= location (vec3 0.0 0.0 0.0)))
+      (is-true (= value 42)))
+
+    (multiple-value-bind (location value) (closest qt (vec3 0.0 9.0 0.0))
+      (is-true (v= location (vec3 0.0 10.0 0.0)))
+      (is-true (= value 47)))))
+
