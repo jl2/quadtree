@@ -27,7 +27,7 @@
 (def-suite :quadtree)
 (in-suite :quadtree)
 
-(test insert
+(test insert-and-size
   (let ((qt (make-instance 'quadtree)))
 
     (insert qt (vec3 0.0 0.0 0.0) 42)
@@ -42,13 +42,13 @@
 
 (test locate
   (let ((qt (make-instance 'quadtree)))
-    (insert qt (vec3 0.0 10.0 0.0) 42)
+    (insert qt (vec3 0.1 10.0 2.0) 42)
     (is-true (= (locate qt 42) 42))
 
-    (insert qt (vec3 0.0 10.0 -10.0) 142)
+    (insert qt (vec3 0.2 10.0 -10.0) 142)
     (is-true (= (locate qt 142) 142))
 
-    (insert qt (vec3 10.0 10.0 -10.0) 42)
+    (insert qt (vec3 10.1 38.2 -12.0) 42)
     (is-true (= (locate qt 42) 42))
 
     (insert qt (vec3 10.0 10.0 -10.0) 42)
@@ -69,3 +69,29 @@
       (is-true (v= location (vec3 0.0 10.0 0.0)))
       (is-true (= value 47)))))
 
+
+(test remove-item
+  (let ((qt (null (closest qt (vec3 0.0 0.0 0.0)))))
+
+    (insert qt (vec3 0.0 0.0 0.0) 100)
+    (is-true (= 1 (qsize qt)))
+    (remove-item qt 100)
+
+    (is-true (= 0 (qsize qt)))
+    (is-true (null (locate qt 100)))
+    (is-true (null (closest qt (vec3 0.0 0.0 0.0))))
+
+    (insert qt (vec3 70.2 0.0 -10.0) 42)
+    (insert qt (vec3 -18.2 -3.5 -10.0) 42)
+    (is-true (= 2 (qsize qt)))
+    (remove-item qt 42)
+    (is-true (null (locate qt 100)))
+    (is-true (null (locate qt 42)))
+    (is-true (= 0 (qsize qt)))
+
+    (insert qt (vec3 -17.0 0.0 -10.0) 41)
+    (insert qt (vec3 18.0 -3.5 -10.0) 42)
+    (is-true (= 2 (qsize qt)))
+    (remove-item qt 41)
+    (is-true (= 1 (qsize qt)))
+    (is-true (= 42 (locate qt 42)))))
