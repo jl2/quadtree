@@ -1,6 +1,6 @@
 * quadtree
 ** About
-This is a project to do something.
+A simple QuadTree library.
 
 ** License
 ISC
@@ -10,6 +10,12 @@ Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 
 
-
 * Plan
-** TODO Fill in a TODO list.
+** TODO Add interface to file:package.lisp
+** TODO Add defgenerics for interface to file:quadtree.lisp
+** TODO Add tests to file:t/package.lisp
+** TODO Implement insert and find
+** TODO Implement contains-p
+** TODO Implement remove
+
+

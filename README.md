@@ -1,7 +1,7 @@
 # quadtree
 ### _Jeremiah LaRocco <jeremiah_larocco@fastmail.com>_
 
-This is a project to do ... something.
+Simple QuadTree library.
 
 ## License
 
