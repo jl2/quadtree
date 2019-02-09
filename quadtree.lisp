@@ -32,13 +32,13 @@
 (defgeneric qsize (qt)
   (:documentation "Returns the number of points in the quadtree."))
 
-(defgeneric locate (qt item)
+(defgeneric locate (qt item test)
   (:documentation "Returns nil if the item is not in the quadtree, returns the item's location otherwise."))
 
 (defgeneric closest (qt point)
   (:documentation "Returns the point and value closest to point, returns nil if the quadtree is empty."))
 
-(defgeneric remove-item (qt item)
+(defgeneric remove-item (qt item test)
   (:documentation "Remove item from the quadtree."))
 
 (defgeneric remove-from (qt point)
