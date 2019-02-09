@@ -17,5 +17,29 @@
 
 (in-package :quadtree)
 
-(defun hello ()
-  (error "Not implemented"))
+(defclass quadtree-node ()
+  ((point :initarg :point :type vec3)
+   (data :initarg :value :type t)))
+
+
+(defclass quadtree ()
+  ()
+  (:documentation "A QuadTree class."))
+
+(defgeneric qsize (qt)
+  (:documentation "Returns the number of points in the quadtree."))
+
+(defgeneric locate (qt item)
+  (:documentation "Returns nil if the item is not in the quadtree, returns the item's location otherwise."))
+
+(defgeneric closest (qt point)
+  (:documentation "Returns the point and value closest to point, returns nil if the quadtree is empty."))
+
+(defgeneric insert (qt point item)
+  (:documentation "Inserts item into qt at point.  Duplicates are allowed."))
+
+(defgeneric remove-item (qt item)
+  (:documentation "Remove item from the quadtree."))
+
+(defgeneric remove-from (qt point)
+  (:documentation "Remove item from quadtree at point, if it exists."))

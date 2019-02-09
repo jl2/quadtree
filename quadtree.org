@@ -11,8 +11,8 @@ Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 
 * Plan
-** TODO Add interface to file:package.lisp
-** TODO Add defgenerics for interface to file:quadtree.lisp
+** DONE Add interface to file:package.lisp
+** DONE Add defgenerics for interface to file:quadtree.lisp
 ** TODO Add tests to file:t/package.lisp
 ** TODO Implement insert and find
 ** TODO Implement contains-p

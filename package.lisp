@@ -16,9 +16,11 @@
 ;; OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 (defpackage :quadtree
-  (:use #:cl #:j-utils #:alexandria)
+  (:use #:cl #:j-utils #:alexandria #:3d-vectors)
   (:export #:quad-tree
-           #:size
-           #:contains-p
+           #:qsize
+           #:locate
+           #:closest
            #:insert
-           #:remove))
+           #:remove-item
+           #:remove-from))
