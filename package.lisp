@@ -17,4 +17,8 @@
 
 (defpackage :quadtree
   (:use #:cl #:j-utils #:alexandria)
-  (:export #:hello))
+  (:export #:quad-tree
+           #:size
+           #:contains-p
+           #:insert
+           #:remove))
