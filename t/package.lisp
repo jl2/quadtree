@@ -27,5 +27,16 @@
 (def-suite :quadtree)
 (in-suite :quadtree)
 
-(test hello
-  (is-true (hello)))
+(test insert
+  (let ((qt (make-instance 'quadtree)))
+
+    (insert qt (vec3 0.0 0.0 0.0))
+
+    (is-true (= (qsize qt) 1))
+
+    (insert qt (vec3 0.0 0.0 0.0))
+    (is-true (= (qsize qt) 2))
+
+    (insert qt (vec3 0.0 1.0 0.0))
+    (is-true (= (qsize qt) 3))))
+
