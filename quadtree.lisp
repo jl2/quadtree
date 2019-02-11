@@ -18,19 +18,72 @@
 (in-package :quadtree)
 
 (defclass quadtree-node ()
-  ((point :initarg :point :type vec3)
+  ((point :initarg :point :type vec2)
    (data :initarg :value :type t)))
 
 
 (defclass quadtree ()
-  ()
+  ((point :type vec2)
+   (depth :initform -1 :type fixnum)
+   (data :type (or null cons))
+   (top-left :type (or null quadtree))
+   (top-right :type (or null quadtree))
+   (bottom-left :type (or null quadtree))
+   (bottom-right :type (or null quadtree)))
   (:documentation "A QuadTree class."))
 
-(defgeneric insert (qt point item)
+(defgeneric insert (qt point new-item)
   (:documentation "Inserts item into qt at point.  Duplicates are allowed."))
+
+(defmethod insert ((qt quadtree) new-point new-item)
+  (if (not (slot-boundp qt 'point))
+      (progn
+        (setf (slot-value qt 'point) new-point)
+        (setf (slot-value qt 'data) (list new-item)))
+      (with-slots (point data bottom-left bottom-right top-left top-right depth) qt
+        (incf depth)
+        (cond ((null point)
+               (setf point new-point)
+               (push new-item data))
+
+              ;; This point
+              ((v= point new-point)
+               (push new-item data))
+
+              ;; Top left
+              ((and (< (vx new-point) (vx point))
+                    (> (vy new-point) (vy point)))
+               (when (null top-left)
+                 (setf top-left (make-instance 'quadtree)))
+               (insert top-left new-point new-item))
+
+              ;; Bottom left
+              ((and (< (vx new-point) (vx point))
+                    (< (vy new-point) (vy point)))
+               (when (null bottom-left)
+                 (setf bottom-left (make-instance 'quadtree)))
+               (insert bottom-left new-point new-item))
+
+              ;; Top right
+              ((and (> (vx new-point) (vx point))
+                    (> (vy new-point) (vy point)))
+               (when (null top-right)
+                 (setf top-right (make-instance 'quadtree)))
+               (insert top-right new-point new-item))
+
+              ;; Bottom right
+              ((and (> (vx new-point) (vx point))
+                    (< (vy new-point) (vy point)))
+               (when (null bottom-right)
+                 (setf bottom-right (make-instance 'quadtree)))
+               (insert bottom-right new-point new-item))))))
 
 (defgeneric qsize (qt)
   (:documentation "Returns the number of points in the quadtree."))
+
+(defmethod qsize ((qt quadtree))
+  (with-slots (depth) qt
+    depth))
 
 (defgeneric locate (qt item test)
   (:documentation "Returns nil if the item is not in the quadtree, returns the item's location otherwise."))
