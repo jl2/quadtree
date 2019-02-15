@@ -32,7 +32,7 @@
   (let ((qt (make-instance 'quadtree)))
 
     (insert qt (vec2 0.0 0.0) 42)
-    (is-true (= (qsize qt) 1) 43)
+    (is-true (= (qsize qt) 1))
 
     (insert qt (vec2 0.0 0.0) 44)
     (is-true (= (qsize qt) 2))
@@ -98,11 +98,11 @@
     (is-true (= 0 (qsize qt)))
 
     (insert qt (vec2-random 0.0 1.0) 41)
-    (insert qt (vec20 10.0 10.0) 42)
+    (insert qt (vec2 10.0 10.0) 42)
     (is-true (= 2 (qsize qt)))
     (remove-item qt 41)
     (is-true (= 1 (qsize qt)))
-    (is-true (= (vec20 10.0 10.0) (locate qt 42 #'=)))))
+    (is-true (= (vec2 10.0 10.0) (locate qt 42 #'=)))))
 
 (test remove-from
   (let ((qt (make-instance 'quadtree)))
