@@ -24,4 +24,10 @@
            #:insert
            #:depth-first
            #:remove-item
-           #:remove-from))
+           #:remove-from
+           #:get-quadrant
+           #:opposite-quadrant
+           #:top-left
+           #:top-right
+           #:bottom-left
+           #:bottom-right))

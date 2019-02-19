@@ -76,11 +76,11 @@
 
     (multiple-value-bind (location values) (closest qt (vec2 6.0 0.0))
       (is-true (v= location (vec2 5.0 0.0)))
-      (is-true (find value 42 :test #'=)))
+      (is-true (find 42 values :test #'=)))
 
     (multiple-value-bind (location values) (closest qt (vec2 9.0 0.0))
       (is-true (v= location (vec2 10.0 0.0)))
-      (is-true (find values 47 :test #'=)))))
+      (is-true (find 47 values :test #'=)))))
 
 
 (test remove-item
@@ -142,3 +142,9 @@
     (remove-item qt 41 #'=)
     (is-true (= 1 (qsize qt)))
     (is-true (= 42 (locate qt 42 #'=)))))
+
+(test get-quadrant
+  (is-true (eq 'top-left     (get-quadrant (vec2 0.0 0.0) (vec2 -1.0 1.0))))
+  (is-true (eq 'top-right    (get-quadrant (vec2 0.0 0.0) (vec2 1.0 1.0))))
+  (is-true (eq 'bottom-left  (get-quadrant (vec2 0.0 0.0) (vec2 -1.0 -1.0))))
+  (is-true (eq 'bottom-right (get-quadrant (vec2 0.0 0.0) (vec2 1.0 -1.0)))))
