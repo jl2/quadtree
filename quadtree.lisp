@@ -48,6 +48,7 @@
 (defgeneric remove-from (qt point)
   (:documentation "Remove item from quadtree at point, if it exists."))
 
+
 (declaim (inline get-quadrant))
 (defun get-quadrant (root pt)
   (cond ((and (<= (vx pt) (vx root))
@@ -117,39 +118,16 @@
     results))
 
 (defmethod closest (qt the-point)
-  (with-slots (point data depth top-left top-right bottom-left bottom-right) qt
-    (cond ((null point)
-           (values nil nil))
+  (with-slots (point data depth) qt
+    (cond
+      ((null point)
+       (values nil nil))
 
-          ((v= point the-point)
-           (values point data))
+      ((v= point the-point)
+       (values point data))
 
-          ;; Top left
-          ((and (<= (vx the-point) (vx point))
-                (> (vy the-point) (vy point)))
-           (if (null top-left)
-               (values point data)
-               (closest top-left the-point)))
-
-          ;; Bottom left
-          ((and (<= (vx the-point) (vx point))
-                (<= (vy the-point) (vy point)))
-           (if (null bottom-left)
-               (values point data)
-               (closest bottom-left the-point)))
-
-          ;; Top right
-          ((and (> (vx the-point) (vx point))
-                (> (vy the-point) (vy point)))
-           (if (null top-right)
-               (values point data)
-               (closest top-right the-point)))
-
-          ;; Bottom right
-          ((and (> (vx the-point) (vx point))
-                (<= (vy the-point) (vy point)))
-           (if (null bottom-right)
-               (values point data)
-               (closest bottom-right the-point))))))
-
-
+      (t
+       (let ((quad (get-quadrant point the-point)))
+         (if (null (slot-value qt quad))
+             (values point data)
+             (closest (slot-value qt quad) the-point)))))))
