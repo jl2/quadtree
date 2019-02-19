@@ -27,6 +27,10 @@
    (bottom-right :initform nil :type (or null quadtree)))
   (:documentation "A QuadTree class."))
 
+(defclass point-quadtree (quadtree)
+  ()
+  (:documentation "A point quadtree, where space is subdivided at each point."))
+
 (defgeneric qsize (qt)
   (:documentation "Returns the number of points in the quadtree."))
 
@@ -75,7 +79,7 @@
          'top-left)
         (t (error "Unknown quadrant! ~a" quad))))
 
-(defmethod insert ((qt quadtree) new-point new-item)
+(defmethod insert ((qt point-quadtree) new-point new-item)
   (with-slots (point data size) qt
     (incf size)
     (cond
@@ -92,10 +96,10 @@
            (setf (slot-value qt quad) (make-instance 'quadtree)))
          (insert (slot-value qt quad) new-point new-item))))))
 
-(defmethod qsize ((qt quadtree))
+(defmethod qsize ((qt point-quadtree))
   (slot-value qt 'size))
 
-(defmethod depth-first ((qt quadtree) function)
+(defmethod depth-first ((qt point-quadtree) function)
   (with-slots (point data size top-left top-right bottom-left bottom-right) qt
     (when top-left
       (depth-first top-left function))
@@ -108,7 +112,7 @@
     (when (and point data)
       (funcall function qt))))
 
-(defmethod locate (qt the-item test)
+(defmethod locate ((qt point-quadtree) the-item test)
   (let ((results nil))
     (depth-first
      qt
@@ -117,7 +121,7 @@
          (push (slot-value node 'point) results))))
     results))
 
-(defmethod closest (qt the-point)
+(defmethod closest ((qt point-quadtree) the-point)
   (with-slots (point data depth) qt
     (cond
       ((null point)

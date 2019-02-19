@@ -29,7 +29,7 @@
 (in-suite :quadtree)
 
 (test insert-and-size
-  (let ((qt (make-instance 'quadtree)))
+  (let ((qt (make-instance 'point-quadtree)))
 
     (insert qt (vec2 0.0 0.0) 42)
     (is-true (= (qsize qt) 1))
@@ -46,7 +46,7 @@
         (rp2 (vec2-random 0.0 1.0))
         (rp3 (vec2-random 0.0 1.0))
         (rp4 (vec2-random 0.0 1.0))
-        (qt (make-instance 'quadtree)))
+        (qt (make-instance 'point-quadtree)))
 
     (insert qt rp1 42)
     (let ((lr (locate qt 42 #'=)))
@@ -64,7 +64,7 @@
       (is-true (find rp3 lr :test #'v=)))))
 
 (test closest
-  (let ((qt (make-instance 'quadtree)))
+  (let ((qt (make-instance 'point-quadtree)))
     (is-true (null (closest qt (vec2 0.0 0.0))))
 
     (insert qt (vec2-random 0.0 1.0) 1)
@@ -84,7 +84,7 @@
 
 
 (test remove-item
-  (let ((qt (make-instance 'quadtree)))
+  (let ((qt (make-instance 'point-quadtree)))
 
     (insert qt (vec2-random 0.0 1.0) 100)
     (is-true (= 1 (qsize qt)))
@@ -113,7 +113,7 @@
     (is-true (= (vec2 10.0 10.0) (locate qt 42 #'=)))))
 
 (test remove-from
-  (let ((qt (make-instance 'quadtree)))
+  (let ((qt (make-instance 'point-quadtree)))
 
     (insert qt (vec2 0.0 0.0) 100)
     (is-true (= 1 (qsize qt)))
