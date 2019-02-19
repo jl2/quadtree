@@ -22,5 +22,6 @@
            #:locate
            #:closest
            #:insert
+           #:depth-first
            #:remove-item
            #:remove-from))

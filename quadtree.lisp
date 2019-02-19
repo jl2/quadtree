@@ -23,136 +23,139 @@
 
 
 (defclass quadtree ()
-  ((point :type vec2)
-   (depth :initform 0 :type fixnum)
-   (data :type (or null cons))
-   (top-left :type (or null quadtree))
-   (top-right :type (or null quadtree))
-   (bottom-left :type (or null quadtree))
-   (bottom-right :type (or null quadtree)))
+  ((point :initform nil :type (or null vec2))
+   (size :initform 0 :type fixnum)
+   (data :initform nil :type (or null cons))
+   (top-left :initform nil :type (or null quadtree))
+   (top-right :initform nil :type (or null quadtree))
+   (bottom-left :initform nil :type (or null quadtree))
+   (bottom-right :initform nil :type (or null quadtree)))
   (:documentation "A QuadTree class."))
 
 (defgeneric insert (qt point new-item)
   (:documentation "Inserts item into qt at point.  Duplicates are allowed."))
 
 (defmethod insert ((qt quadtree) new-point new-item)
-  (if (not (slot-boundp qt 'point))
-      (progn
-        ;; (format t "No point in root!~%")
-        (incf (slot-value qt 'depth))
-        (setf (slot-value qt 'point) new-point)
-        (setf (slot-value qt 'data) (list new-item)))
-      (with-slots (point data depth) qt
-        (format t "Point was bound...~%")
-        (incf depth)
-        (cond ((null point)
-               ;; (format t "Point was null? How~%")
-               (setf point new-point)
-               (push new-item data))
+  (with-slots (point data size top-left top-right bottom-left bottom-right) qt
+    (incf size)
+    (cond ((null point)
+           ;; (format t "Point was null? How~%")
+           (setf point new-point)
+           (push new-item data))
 
-              ;; This point
-              ((v= point new-point)
-               ;; (format t "Point was already present, pushing~%")
-               (push new-item data))
+          ;; This point
+          ((v= point new-point)
+           ;; (format t "Point was already present, pushing~%")
+           (push new-item data))
 
-              ;; Top left
-              ((and (<= (vx new-point) (vx point))
-                    (> (vy new-point) (vy point)))
-               ;; (format t "Point was is above and left~%")
-               (when (not (slot-boundp qt 'top-left))
-                 (setf (slot-value qt 'top-left) (make-instance 'quadtree)))
-               (insert (slot-value qt 'top-left) new-point new-item))
+          ;; Top left
+          ((and (<= (vx new-point) (vx point))
+                (> (vy new-point) (vy point)))
+           ;; (format t "Point was is above and left~%")
+           (when (null top-left)
+             (setf top-left (make-instance 'quadtree)))
+           (insert top-left new-point new-item))
 
-              ;; Bottom left
-              ((and (<= (vx new-point) (vx point))
-                    (<= (vy new-point) (vy point)))
-               ;; (format t "Point was is below and left~%")
-               (when (not (slot-boundp qt 'bottom-left))
-                 (setf (slot-value qt 'bottom-left) (make-instance 'quadtree)))
-               (insert (slot-value qt 'bottom-left) new-point new-item))
+          ;; Bottom left
+          ((and (<= (vx new-point) (vx point))
+                (<= (vy new-point) (vy point)))
+           ;; (format t "Point was is below and left~%")
+           (when (null bottom-left)
+             (setf bottom-left (make-instance 'quadtree)))
+           (insert bottom-left new-point new-item))
 
-              ;; Top right
-              ((and (> (vx new-point) (vx point))
-                    (> (vy new-point) (vy point)))
-               ;; (format t "Point was is above and right~%")
-               (when (not (slot-boundp qt 'top-right))
-                 (setf (slot-value qt 'top-right) (make-instance 'quadtree)))
-               (insert (slot-value qt 'top-right) new-point new-item))
+          ;; Top right
+          ((and (> (vx new-point) (vx point))
+                (> (vy new-point) (vy point)))
+           ;; (format t "Point was is above and right~%")
+           (when (null top-right)
+             (setf top-right (make-instance 'quadtree)))
+           (insert top-right new-point new-item))
 
-              ;; Bottom right
-              ((and (> (vx new-point) (vx point))
-                    (<= (vy new-point) (vy point)))
-               ;; (format t "Point was is below and right~%")
-               (when (not (slot-boundp qt 'bottom-right))
-                 (setf (slot-value qt 'bottom-right) (make-instance 'quadtree)))
-               (insert (slot-value qt 'bottom-right) new-point new-item))))))
+          ;; Bottom right
+          ((and (> (vx new-point) (vx point))
+                (<= (vy new-point) (vy point)))
+           ;; (format t "Point was is below and right~%")
+           (when (null bottom-right)
+             (setf bottom-right (make-instance 'quadtree))) 
+          (insert bottom-right new-point new-item)))))
 
 (defgeneric qsize (qt)
   (:documentation "Returns the number of points in the quadtree."))
 
 (defmethod qsize ((qt quadtree))
-  (slot-value qt 'depth))
+  (slot-value qt 'size))
 
 (defgeneric locate (qt item test)
   (:documentation "Returns nil if the item is not in the quadtree, returns the item's location otherwise."))
 
-(defmethod locate (qt item test)
-  (if (not (slot-boundp qt 'point))
-      (progn
-        ;; (format t "No point in root!~%")
-        (incf (slot-value qt 'depth))
-        (setf (slot-value qt 'point) new-point)
-        (setf (slot-value qt 'data) (list new-item)))
-      (with-slots (point data depth) qt
-        (format t "Point was bound...~%")
-        (incf depth)
-        (cond ((null point)
-               ;; (format t "Point was null? How~%")
-               (setf point new-point)
-               (push new-item data))
+(defgeneric depth-first (qt function)
+  (:documentation "Depth first traversal of quadtree."))
 
-              ;; This point
-              ((v= point new-point)
-               ;; (format t "Point was already present, pushing~%")
-               (push new-item data))
+(defmethod depth-first ((qt quadtree) function)
+  (with-slots (point data size top-left top-right bottom-left bottom-right) qt
+    (when top-left
+      (depth-first top-left function))
+    (when top-right
+      (depth-first top-right function))
+    (when bottom-right
+      (depth-first bottom-right function))
+    (when bottom-left
+      (depth-first bottom-left function))
+    (when (and point data)
+      (funcall function qt))))
 
-              ;; Top left
-              ((and (<= (vx new-point) (vx point))
-                    (> (vy new-point) (vy point)))
-               ;; (format t "Point was is above and left~%")
-               (when (not (slot-boundp qt 'top-left))
-                 (setf (slot-value qt 'top-left) (make-instance 'quadtree)))
-               (insert (slot-value qt 'top-left) new-point new-item))
-
-              ;; Bottom left
-              ((and (<= (vx new-point) (vx point))
-                    (<= (vy new-point) (vy point)))
-               ;; (format t "Point was is below and left~%")
-               (when (not (slot-boundp qt 'bottom-left))
-                 (setf (slot-value qt 'bottom-left) (make-instance 'quadtree)))
-               (insert (slot-value qt 'bottom-left) new-point new-item))
-
-              ;; Top right
-              ((and (> (vx new-point) (vx point))
-                    (> (vy new-point) (vy point)))
-               ;; (format t "Point was is above and right~%")
-               (when (not (slot-boundp qt 'top-right))
-                 (setf (slot-value qt 'top-right) (make-instance 'quadtree)))
-               (insert (slot-value qt 'top-right) new-point new-item))
-
-              ;; Bottom right
-              ((and (> (vx new-point) (vx point))
-                    (<= (vy new-point) (vy point)))
-               ;; (format t "Point was is below and right~%")
-               (when (not (slot-boundp qt 'bottom-right))
-                 (setf (slot-value qt 'bottom-right) (make-instance 'quadtree)))
-               (insert (slot-value qt 'bottom-right) new-point new-item))))))
+(defmethod locate (qt the-item test)
+  (let ((results nil))
+    (depth-first
+     qt
+     (lambda (node)
+       (when (find the-item (slot-value node 'data) :test test)
+         (push (slot-value node 'point) results))))
+    results))
 
 (defgeneric closest (qt point)
   (:documentation "Returns the point and value closest to point, returns nil if the quadtree is empty."))
 
+(defmethod closest (qt the-point)
+  (with-slots (point data depth top-left top-right bottom-left bottom-right) qt
+    (cond ((null point)
+           (values nil nil))
+
+          ((v= point the-point)
+           (values point data))
+
+          ;; Top left
+          ((and (<= (vx the-point) (vx point))
+                (> (vy the-point) (vy point)))
+           (if (null top-left)
+               (values point data)
+               (closest top-left the-point)))
+
+          ;; Bottom left
+          ((and (<= (vx the-point) (vx point))
+                (<= (vy the-point) (vy point)))
+           (if (null bottom-left)
+               (values point data)
+               (closest bottom-left the-point)))
+
+          ;; Top right
+          ((and (> (vx the-point) (vx point))
+                (> (vy the-point) (vy point)))
+           (if (null top-right)
+               (values point data)
+               (closest top-right the-point)))
+
+          ;; Bottom right
+          ((and (> (vx the-point) (vx point))
+                (<= (vy the-point) (vy point)))
+           (if (null bottom-right)
+               (values point data)
+               (closest bottom-right the-point))))))
+
 (defgeneric remove-item (qt item test)
   (:documentation "Remove item from the quadtree."))
+
 
 (defgeneric remove-from (qt point)
   (:documentation "Remove item from quadtree at point, if it exists."))
