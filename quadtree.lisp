@@ -46,6 +46,9 @@
 (defgeneric closest (qt point)
   (:documentation "Returns the point and value closest to point, returns nil if the quadtree is empty."))
 
+(defgeneric range-find (qt point range)
+  (:documentation "Returns the point and value closest to point, returns nil if the quadtree is empty."))
+
 (defgeneric remove-item (qt item test)
   (:documentation "Remove item from the quadtree."))
 
@@ -53,8 +56,8 @@
   (:documentation "Remove item from quadtree at point, if it exists."))
 
 
-(declaim (inline get-quadrant))
-(defun get-quadrant (root pt)
+(declaim (inline quadrant-of))
+(defun quadrant-of (root pt)
   (cond ((and (<= (vx pt) (vx root))
               (> (vy pt) (vy root)))
          'top-left)
@@ -91,9 +94,9 @@
        (push new-item data))
 
       (t
-       (let ((quad (get-quadrant point new-point)))
+       (let ((quad (quadrant-of point new-point)))
          (when (null (slot-value qt quad))
-           (setf (slot-value qt quad) (make-instance 'quadtree)))
+           (setf (slot-value qt quad) (make-instance 'point-quadtree)))
          (insert (slot-value qt quad) new-point new-item))))))
 
 (defmethod qsize ((qt point-quadtree))
@@ -131,7 +134,36 @@
        (values point data))
 
       (t
-       (let ((quad (get-quadrant point the-point)))
+       (let ((quad (quadrant-of point the-point)))
          (if (null (slot-value qt quad))
              (values point data)
              (closest (slot-value qt quad) the-point)))))))
+
+(defun in-range-p (pt min-x max-x min-y max-y)
+  (and (<= (vx pt) max-x)
+       (<= (vy pt) max-y)
+       (>= (vx pt) min-x)
+       (>= (vy pt) min-y)))
+
+(defmethod range-find ((qt quadtree) search-point range)
+  (with-slots (point data depth) qt
+    (let* ((min-x (- (vx search-point) range))
+           (max-x (+ (vx search-point) range))
+           (min-y (- (vy search-point) range))
+           (max-y (+ (vy search-point) range))
+           (quadrants (mapcar (curry #'quadrant-of point)
+                              (list (vec2 min-x max-y)
+                                    (vec2 max-x max-y)
+                                    (vec2 min-x min-y)
+                                    (vec2 max-x min-y))))
+           (unique-quads (union quadrants quadrants :test #'equal)))
+      (format t "quadrants ~a~%" quadrants)
+      (let ((rvals (loop
+                      for quad in unique-quads
+                      when (slot-value qt quad)
+                      appending
+                        (range-find (slot-value qt quad) search-point range))))
+        (when (in-range-p point min-x max-x min-y max-y)
+          (push (cons point data) rvals))
+        rvals))))
+

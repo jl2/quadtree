@@ -25,9 +25,10 @@
            #:depth-first
            #:remove-item
            #:remove-from
-           #:get-quadrant
+           #:quadrant-of
            #:opposite-quadrant
            #:top-left
            #:top-right
            #:bottom-left
-           #:bottom-right))
+           #:bottom-right
+           #:range-find))

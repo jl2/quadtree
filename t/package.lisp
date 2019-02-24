@@ -83,6 +83,19 @@
       (is-true (find 47 values :test #'=)))))
 
 
+(test range-find
+  (let ((qt (make-instance 'point-quadtree)))
+    (is-true (null (closest qt (vec2 0.0 0.0))))
+
+    (insert qt (vec2 0.0 0.0) 1)
+    (insert qt (vec2 1.0 0.0) 2)
+    (insert qt (vec2 2.0 0.0) 3)
+    (insert qt (vec2 3.0 0.0) 3)
+    (insert qt (vec2 4.0 0.0) 3)
+    (insert qt (vec2 5.0 0.0) 3)
+    (let ((results (range-find qt (vec2 2.5 0.0) 1.0)))
+      (is-true (= 2 (length results))))))
+
 (test remove-item
   (let ((qt (make-instance 'point-quadtree)))
 
@@ -143,8 +156,8 @@
     (is-true (= 1 (qsize qt)))
     (is-true (= 42 (locate qt 42 #'=)))))
 
-(test get-quadrant
-  (is-true (eq 'top-left     (get-quadrant (vec2 0.0 0.0) (vec2 -1.0 1.0))))
-  (is-true (eq 'top-right    (get-quadrant (vec2 0.0 0.0) (vec2 1.0 1.0))))
-  (is-true (eq 'bottom-left  (get-quadrant (vec2 0.0 0.0) (vec2 -1.0 -1.0))))
-  (is-true (eq 'bottom-right (get-quadrant (vec2 0.0 0.0) (vec2 1.0 -1.0)))))
+(test quadrant-of
+  (is-true (eq 'top-left     (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 1.0))))
+  (is-true (eq 'top-right    (quadrant-of (vec2 0.0 0.0) (vec2 1.0 1.0))))
+  (is-true (eq 'bottom-left  (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 -1.0))))
+  (is-true (eq 'bottom-right (quadrant-of (vec2 0.0 0.0) (vec2 1.0 -1.0)))))
