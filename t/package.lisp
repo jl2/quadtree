@@ -82,11 +82,15 @@
       (is-true (v= location (vec2 10.0 0.0)))
       (is-true (find 47 values :test #'=)))))
 
+(defun build-grid-quadtree (type width height)
+  (let ((qt (make-instance type)))
+    (dotimes (i width)
+      (dotimes (j height)
+        (insert qt (vec2 i j) (* i j))))
+    qt))
 
 (test range-find
   (let ((qt (make-instance 'point-quadtree)))
-    (is-true (null (closest qt (vec2 0.0 0.0))))
-
     (insert qt (vec2 0.0 0.0) 1)
     (insert qt (vec2 1.0 0.0) 2)
     (insert qt (vec2 2.0 0.0) 3)
@@ -94,7 +98,13 @@
     (insert qt (vec2 4.0 0.0) 3)
     (insert qt (vec2 5.0 0.0) 3)
     (let ((results (range-find qt (vec2 2.5 0.0) 1.0)))
-      (is-true (= 2 (length results))))))
+      (format t "found: ~a~%" results)
+      (is-true (= 2 (length results)))))
+
+  ;; (let* ((qt (build-grid-quadtree 'point-quadtree 5 5))
+  ;;       (results (range-find qt (vec2 2.5 2.5) 1.0)))
+  ;;     (is-true (= 5 (length results))))
+  )
 
 (test remove-item
   (let ((qt (make-instance 'point-quadtree)))
@@ -161,3 +171,9 @@
   (is-true (eq 'top-right    (quadrant-of (vec2 0.0 0.0) (vec2 1.0 1.0))))
   (is-true (eq 'bottom-left  (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 -1.0))))
   (is-true (eq 'bottom-right (quadrant-of (vec2 0.0 0.0) (vec2 1.0 -1.0)))))
+
+(test in-range
+  (is-true  (in-range-p (vec2 5.0 5.0) 0.0 5.0 0.0 5.0))
+  (is-false (in-range-p (vec2 5.0 5.0) 0.0 5.0 0.0 1.0))
+  (is-false (in-range-p (vec2 5.0 5.0) 0.0 1.0 0.0 5.0))
+  (is-false (in-range-p (vec2 5.0 5.0) 0.0 1.0 0.0 1.0)))

@@ -146,24 +146,27 @@
        (>= (vy pt) min-y)))
 
 (defmethod range-find ((qt quadtree) search-point range)
-  (with-slots (point data depth) qt
-    (let* ((min-x (- (vx search-point) range))
-           (max-x (+ (vx search-point) range))
-           (min-y (- (vy search-point) range))
-           (max-y (+ (vy search-point) range))
-           (quadrants (mapcar (curry #'quadrant-of point)
-                              (list (vec2 min-x max-y)
-                                    (vec2 max-x max-y)
-                                    (vec2 min-x min-y)
-                                    (vec2 max-x min-y))))
-           (unique-quads (union quadrants quadrants :test #'equal)))
-      (format t "quadrants ~a~%" quadrants)
-      (let ((rvals (loop
-                      for quad in unique-quads
-                      when (slot-value qt quad)
-                      appending
-                        (range-find (slot-value qt quad) search-point range))))
-        (when (in-range-p point min-x max-x min-y max-y)
-          (push (cons point data) rvals))
-        rvals))))
+  (let ((min-x (- (vx search-point) range))
+        (max-x (+ (vx search-point) range))
+        (min-y (- (vy search-point) range))
+        (max-y (+ (vy search-point) range)))
+    (labels ((rfind (qt)
+               (with-slots (point data size) qt
+                 (format t "In rfind for ~a ~a ~a ~a~%" qt point data size)
+                 (let* ((quadrants (mapcar (curry #'quadrant-of point)
+                                           (list (vec2 min-x max-y)
+                                                 (vec2 max-x max-y)
+                                                 (vec2 min-x min-y)
+                                                 (vec2 max-x min-y))))
+                        (unique-quads (remove-duplicates quadrants :test #'equal))
+                        (rvals (loop
+                                  for quad in unique-quads
+                                  when (slot-value qt quad)
+                                  appending (progn (format t "Calling rfind on ~a~%" quad) (rfind (slot-value qt quad))))))
+;;                   (format t "rvals: ~a~%" rvals)
+                   (when (in-range-p point min-x max-x min-y max-y)
+                     (format t "Adding ~a to results." point)
+                     (push (cons point data) rvals))
+                   rvals))))
+      (rfind qt))))
 
