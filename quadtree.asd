@@ -23,5 +23,6 @@
   :serial t
   :depends-on (#:3d-vectors #:j-utils #:alexandria)
   :components ((:file "package")
-               (:file "quadtree"))
+               (:file "quadtree")
+               (:file "point-quadtree"))
   :in-order-to ((test-op (test-op quadtree.test))))

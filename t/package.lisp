@@ -98,12 +98,12 @@
     (insert qt (vec2 4.0 0.0) 3)
     (insert qt (vec2 5.0 0.0) 3)
     (let ((results (range-find qt (vec2 2.5 0.0) 1.0)))
-      (format t "found: ~a~%" results)
       (is-true (= 2 (length results)))))
 
-  ;; (let* ((qt (build-grid-quadtree 'point-quadtree 5 5))
-  ;;       (results (range-find qt (vec2 2.5 2.5) 1.0)))
-  ;;     (is-true (= 5 (length results))))
+  (let* ((qt (build-grid-quadtree 'point-quadtree 5 5))
+         (results (range-find qt (vec2 2.0 2.0) 1.0)))
+    (format t "results: ~a~%" results)
+    (is-true (= 9 (length results))))
   )
 
 (test remove-item
