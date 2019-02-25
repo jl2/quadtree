@@ -156,8 +156,8 @@
                                     (vec2 max-x max-y)
                                     (vec2 min-x min-y)
                                     (vec2 max-x min-y))))
-           (unique-quads (union quadrants quadrants :test #'equal)))
-      (format t "quadrants ~a~%" quadrants)
+           (unique-quads (remove-duplicates quadrants :test #'equal)))
+      (format t "quadrants ~a~%" unique-quads)
       (let ((rvals (loop
                       for quad in unique-quads
                       when (slot-value qt quad)
