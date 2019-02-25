@@ -152,7 +152,6 @@
         (max-y (+ (vy search-point) range)))
     (labels ((rfind (qt)
                (with-slots (point data size) qt
-                 (format t "In rfind for ~a ~a ~a ~a~%" qt point data size)
                  (let* ((quadrants (mapcar (curry #'quadrant-of point)
                                            (list (vec2 min-x max-y)
                                                  (vec2 max-x max-y)
@@ -169,4 +168,3 @@
                      (push (cons point data) rvals))
                    rvals))))
       (rfind qt))))
-
