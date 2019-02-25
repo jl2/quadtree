@@ -64,19 +64,7 @@
     results))
 
 (defmethod closest ((qt point-quadtree) the-point)
-  (with-slots (point data depth) qt
-    (cond
-      ((null point)
-       (values nil nil))
-
-      ((v= point the-point)
-       (values point data))
-
-      (t
-       (let ((quad (quadrant-of point the-point)))
-         (if (null (slot-value qt quad))
-             (values point data)
-             (closest (slot-value qt quad) the-point)))))))
+  (error "Not implemented."))
 
 (defun in-range-p (pt min-x max-x min-y max-y)
   (and (<= (vx pt) max-x)
@@ -108,8 +96,7 @@
       (rfind qt))))
 
 (defmethod remove-item ((qt point-quadtree) item test)
-  
-  )
+  (error "Not implemented."))
 
 (defmethod remove-from ((qt point-quadtree) point)
-  )
+  (error "Not implemented."))
