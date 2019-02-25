@@ -72,27 +72,29 @@
        (>= (vx pt) min-x)
        (>= (vy pt) min-y)))
 
-(defmethod range-find ((qt quadtree) search-point range)
+(defmethod range-find ((qt point-quadtree) search-point range)
   (let ((min-x (- (vx search-point) range))
         (max-x (+ (vx search-point) range))
         (min-y (- (vy search-point) range))
         (max-y (+ (vy search-point) range)))
-    (labels ((rfind (qt)
-               (with-slots (point data size) qt
-                 (let* ((quadrants (mapcar (curry #'quadrant-of point)
-                                           (list (vec2 min-x max-y)
-                                                 (vec2 max-x max-y)
-                                                 (vec2 min-x min-y)
-                                                 (vec2 max-x min-y))))
-                        (unique-quads (remove-duplicates quadrants :test #'equal))
-                        (rvals (loop
-                                  for quad in unique-quads
-                                  when (slot-value qt quad)
-                                  appending (rfind (slot-value qt quad)))))
-;;                   (format t "rvals: ~a~%" rvals)
-                   (when (in-range-p point min-x max-x min-y max-y)
-                     (push (cons point data) rvals))
-                   rvals))))
+    (labels
+        ((rfind (qt)
+           (with-slots (point data size) qt
+             (let* ((quadrants (mapcar (curry #'quadrant-of point)
+                                       (list (vec2 min-x min-y)
+                                             (vec2 min-x max-y)
+                                             (vec2 max-x min-y)
+                                             (vec2 max-x max-y))))
+                    (unique-quads (remove-duplicates quadrants :test #'equal))
+                    (rvals (loop
+                              for quad in unique-quads
+                              when (slot-value qt quad)
+                              append (rfind (slot-value qt quad)))))
+               (if (in-range-p point
+                               min-x max-x
+                               min-y max-y)
+                 (cons (cons point data) rvals)
+                 rvals)))))
       (rfind qt))))
 
 (defmethod remove-item ((qt point-quadtree) item test)
