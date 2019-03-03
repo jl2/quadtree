@@ -17,10 +17,29 @@
 
 (in-package :quadtree)
 
+(defclass quadtree-entry ()
+  ((point :initarg :point :type vec2)
+   (data :initarg :data :type (or null cons))))
+
+(declaim (inline make-entry add-value remove-value is-point contains))
+(defun make-entry (point data)
+  (make-instance 'quadtree-entry :point point :data (list data)))
+
+(defun add-value (entry new-data)
+  (push new-data (slot-value entry 'data)))
+
+(defun remove-value (entry value &optional (test #'equal))
+  (setf (slot-value entry 'data) (remove-if (curry test value) (slot-value entry 'data))))
+
+(defun is-point (entry new-point)
+  (v= (slot-value entry 'point) new-point))
+
+(defun contains (entry value &optional (test #'equal))
+  (find value (slot-value entry 'data) :test test))
+
 (defclass quadtree ()
-  ((point :initform nil :type (or null vec2))
+  ((entry :initform nil :type (or null quadtree-entry))
    (size :initform 0 :type fixnum)
-   (data :initform nil :type (or null cons))
    (top-left :initform nil :type (or null quadtree))
    (top-right :initform nil :type (or null quadtree))
    (bottom-left :initform nil :type (or null quadtree))

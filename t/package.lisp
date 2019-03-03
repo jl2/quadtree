@@ -97,10 +97,7 @@
     (insert qt (vec2 3.0 0.0) 4)
     (insert qt (vec2 4.0 0.0) 5)
     (insert qt (vec2 5.0 0.0) 6)
-    (let* ((results (range-find qt (vec2 2.5 0.0) 1.0))
-           (p1 (car results))
-           (p2 (cdr results)))
-      (is-true (= 2 (length results)))))
+    (is-true (= 2 (length (range-find qt (vec2 2.5 0.0) 1.0)))))
 
   (let* ((qt (build-grid-quadtree 'point-quadtree 5 5))
          (first-results (range-find qt (vec2 2 2) 1.0))

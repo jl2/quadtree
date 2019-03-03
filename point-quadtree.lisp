@@ -22,27 +22,25 @@
   (:documentation "A point quadtree, where space is subdivided at each point."))
 
 (defmethod insert ((qt point-quadtree) new-point new-item)
-  (with-slots (point data size) qt
+  (with-slots (entry size) qt
     (incf size)
-    (cond
-      ((null point)
-       (setf point new-point)
-       (push new-item data))
+    (cond ((null entry)
+           (setf entry (make-entry new-point new-item)))
 
-      ((v= point new-point)
-       (push new-item data))
+          ((is-point entry new-point)
+           (add-value entry new-item))
 
-      (t
-       (let ((quad (quadrant-of point new-point)))
-         (when (null (slot-value qt quad))
-           (setf (slot-value qt quad) (make-instance 'point-quadtree)))
-         (insert (slot-value qt quad) new-point new-item))))))
+          (t
+           (let ((quad (quadrant-of (slot-value entry 'point) new-point)))
+             (when (null (slot-value qt quad))
+               (setf (slot-value qt quad) (make-instance 'point-quadtree)))
+             (insert (slot-value qt quad) new-point new-item))))))
 
 (defmethod qsize ((qt point-quadtree))
   (slot-value qt 'size))
 
 (defmethod depth-first ((qt point-quadtree) function)
-  (with-slots (point data size top-left top-right bottom-left bottom-right) qt
+  (with-slots (entry size top-left top-right bottom-left bottom-right) qt
     (when top-left
       (depth-first top-left function))
     (when top-right
@@ -51,16 +49,16 @@
       (depth-first bottom-right function))
     (when bottom-left
       (depth-first bottom-left function))
-    (when (and point data)
-      (funcall function qt))))
+    (when entry
+      (funcall function entry))))
 
 (defmethod locate ((qt point-quadtree) the-item test)
   (let ((results nil))
     (depth-first
      qt
-     (lambda (node)
-       (when (find the-item (slot-value node 'data) :test test)
-         (push (slot-value node 'point) results))))
+     (lambda (entry)
+       (when (contains entry the-item test)
+         (push (slot-value entry 'point) results))))
     results))
 
 (defmethod closest ((qt point-quadtree) the-point)
@@ -79,8 +77,8 @@
         (max-y (+ (vy search-point) range)))
     (labels
         ((rfind (qt)
-           (with-slots (point data size) qt
-             (let* ((quadrants (mapcar (curry #'quadrant-of point)
+           (with-slots (entry size) qt
+             (let* ((quadrants (mapcar (curry #'quadrant-of (slot-value entry 'point))
                                        (list (vec2 min-x min-y)
                                              (vec2 min-x max-y)
                                              (vec2 max-x min-y)
@@ -90,10 +88,10 @@
                               for quad in unique-quads
                               when (slot-value qt quad)
                               append (rfind (slot-value qt quad)))))
-               (if (in-range-p point
+               (if (in-range-p (slot-value entry 'point)
                                min-x max-x
                                min-y max-y)
-                 (cons (cons point data) rvals)
+                 (cons entry rvals)
                  rvals)))))
       (rfind qt))))
 
