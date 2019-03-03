@@ -22,16 +22,16 @@
   (:documentation "A point quadtree, where space is subdivided at each point."))
 
 (defmethod insert ((qt point-quadtree) new-point new-item)
-  (with-slots (entry size) qt
+  (with-slots (entries size) qt
     (incf size)
-    (cond ((null entry)
-           (setf entry (make-entry new-point new-item)))
+    (cond ((null entries)
+           (setf entries (make-entry new-point new-item)))
 
-          ((is-point entry new-point)
-           (add-value entry new-item))
+          ((is-point entries new-point)
+           (add-value entries new-item))
 
           (t
-           (let ((quad (quadrant-of (slot-value entry 'point) new-point)))
+           (let ((quad (quadrant-of (slot-value entries 'point) new-point)))
              (when (null (slot-value qt quad))
                (setf (slot-value qt quad) (make-instance 'point-quadtree)))
              (insert (slot-value qt quad) new-point new-item))))))
@@ -40,7 +40,7 @@
   (slot-value qt 'size))
 
 (defmethod depth-first ((qt point-quadtree) function)
-  (with-slots (entry size top-left top-right bottom-left bottom-right) qt
+  (with-slots (entries size top-left top-right bottom-left bottom-right) qt
     (when top-left
       (depth-first top-left function))
     (when top-right
@@ -49,8 +49,8 @@
       (depth-first bottom-right function))
     (when bottom-left
       (depth-first bottom-left function))
-    (when entry
-      (funcall function entry))))
+    (when entries
+      (funcall function entries))))
 
 (defmethod locate ((qt point-quadtree) the-item test)
   (let ((results nil))
@@ -77,8 +77,8 @@
         (max-y (+ (vy search-point) range)))
     (labels
         ((rfind (qt)
-           (with-slots (entry size) qt
-             (let* ((quadrants (mapcar (curry #'quadrant-of (slot-value entry 'point))
+           (with-slots (entries size) qt
+             (let* ((quadrants (mapcar (curry #'quadrant-of (slot-value entries 'point))
                                        (list (vec2 min-x min-y)
                                              (vec2 min-x max-y)
                                              (vec2 max-x min-y)
@@ -88,10 +88,10 @@
                               for quad in unique-quads
                               when (slot-value qt quad)
                               append (rfind (slot-value qt quad)))))
-               (if (in-range-p (slot-value entry 'point)
+               (if (in-range-p (slot-value entries 'point)
                                min-x max-x
                                min-y max-y)
-                 (cons entry rvals)
+                 (cons entries rvals)
                  rvals)))))
       (rfind qt))))
 

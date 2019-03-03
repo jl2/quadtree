@@ -38,7 +38,7 @@
   (find value (slot-value entry 'data) :test test))
 
 (defclass quadtree ()
-  ((entry :initform nil :type (or null quadtree-entry))
+  ((entries :initform nil :type (or null cons quadtree-entry))
    (size :initform 0 :type fixnum)
    (top-left :initform nil :type (or null quadtree))
    (top-right :initform nil :type (or null quadtree))
