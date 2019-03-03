@@ -69,7 +69,7 @@
         ((rfind (qt)
            (with-slots (entries size) qt
              (let* ((quadrants (mapcar (curry #'quadrant-of (slot-value entries 'point))
-                                       (to-points bounds)))
+                                       (bounds-to-points bounds)))
                     (unique-quads (remove-duplicates quadrants :test #'equal))
                     (rvals (loop
                               for quad in unique-quads
