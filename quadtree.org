@@ -5,17 +5,9 @@ A simple QuadTree library.
 ** License
 ISC
 
-
 Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 
-
 * Plan
-** DONE Add interface to file:package.lisp
-** DONE Add defgenerics for interface to file:quadtree.lisp
-** TODO Add tests to file:t/package.lisp
-** TODO Implement insert and find
-** TODO Implement contains-p
-** TODO Implement remove
-
+** TODO pr-quadtree
 

@@ -1,5 +1,5 @@
-;; quadtree.asd
-;;
+;; pr-quadtree.lisp
+
 ;; Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 ;; Permission to use, copy, modify, and/or distribute this software for any
@@ -14,16 +14,9 @@
 ;; ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ;; OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-(asdf:defsystem #:quadtree
-  :description "Describe quadtree here"
-  :author "Jeremiah LaRocco <jeremiah_larocco@fastmail.com>"
-  :license  "ISC"
-  :version "0.0.1"
-  :serial t
-  :depends-on (#:3d-vectors #:j-utils #:alexandria)
-  :components ((:file "package")
-               (:file "entry")
-               (:file "bounds")
-               (:file "quadtree")
-               (:file "point-quadtree"))
-  :in-order-to ((test-op (test-op quadtree.test))))
+(in-package :quadtree)
+
+(defclass pr-quadtree (quadtree)
+  (bounds :initarg :bounds :type quadtree-bounds))
+  (:documentation "A point-range quadtree, where space is subdivided into four equal parts at each level of the tree."))
+

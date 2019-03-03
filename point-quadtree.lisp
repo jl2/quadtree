@@ -1,7 +1,6 @@
-;;;; point-quadtree.lisp 
-;;
-;; Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
+;; point-quadtree.lisp 
 
+;; Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 ;; Permission to use, copy, modify, and/or distribute this software for any
 ;; purpose with or without fee is hereby granted, provided that the above
@@ -64,33 +63,19 @@
 (defmethod closest ((qt point-quadtree) the-point)
   (error "Not implemented."))
 
-(defun in-range-p (pt min-x max-x min-y max-y)
-  (and (<= (vx pt) max-x)
-       (<= (vy pt) max-y)
-       (>= (vx pt) min-x)
-       (>= (vy pt) min-y)))
-
 (defmethod range-find ((qt point-quadtree) search-point range)
-  (let ((min-x (- (vx search-point) range))
-        (max-x (+ (vx search-point) range))
-        (min-y (- (vy search-point) range))
-        (max-y (+ (vy search-point) range)))
+  (let ((bounds (from-point-range search-point range)))
     (labels
         ((rfind (qt)
            (with-slots (entries size) qt
              (let* ((quadrants (mapcar (curry #'quadrant-of (slot-value entries 'point))
-                                       (list (vec2 min-x min-y)
-                                             (vec2 min-x max-y)
-                                             (vec2 max-x min-y)
-                                             (vec2 max-x max-y))))
+                                       (to-points bounds)))
                     (unique-quads (remove-duplicates quadrants :test #'equal))
                     (rvals (loop
                               for quad in unique-quads
                               when (slot-value qt quad)
                               append (rfind (slot-value qt quad)))))
-               (if (in-range-p (slot-value entries 'point)
-                               min-x max-x
-                               min-y max-y)
+               (if (inside-p (slot-value entries 'point) bounds)
                  (cons entries rvals)
                  rvals)))))
       (rfind qt))))

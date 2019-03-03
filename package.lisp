@@ -1,7 +1,6 @@
-;;;; package.lisp 
-;;
-;; Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
+;; package.lisp 
 
+;; Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 ;; Permission to use, copy, modify, and/or distribute this software for any
 ;; purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +17,9 @@
 (defpackage :quadtree
   (:use #:cl #:j-utils #:alexandria #:3d-vectors)
   (:export #:point-quadtree
-           #:in-range-p
+           #:from-point-range
+           #:inside-p
+           #:bounds-to-points
            #:qsize
            #:locate
            #:closest
@@ -32,4 +33,9 @@
            #:top-right
            #:bottom-left
            #:bottom-right
-           #:range-find))
+           #:range-find
+           #:make-entry
+           #:is-point
+           #:remove-value
+           #:add-value
+           #:contains))

@@ -1,7 +1,6 @@
-;;;; quadtree.lisp 
-;;
-;; Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
+;; quadtree.lisp
 
+;; Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 ;; Permission to use, copy, modify, and/or distribute this software for any
 ;; purpose with or without fee is hereby granted, provided that the above
@@ -16,26 +15,6 @@
 ;; OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 (in-package :quadtree)
-
-(defclass quadtree-entry ()
-  ((point :initarg :point :type vec2)
-   (data :initarg :data :type (or null cons))))
-
-(declaim (inline make-entry add-value remove-value is-point contains))
-(defun make-entry (point data)
-  (make-instance 'quadtree-entry :point point :data (list data)))
-
-(defun add-value (entry new-data)
-  (push new-data (slot-value entry 'data)))
-
-(defun remove-value (entry value &optional (test #'equal))
-  (setf (slot-value entry 'data) (remove-if (curry test value) (slot-value entry 'data))))
-
-(defun is-point (entry new-point)
-  (v= (slot-value entry 'point) new-point))
-
-(defun contains (entry value &optional (test #'equal))
-  (find value (slot-value entry 'data) :test test))
 
 (defclass quadtree ()
   ((entries :initform nil :type (or null cons quadtree-entry))
@@ -72,6 +51,7 @@
 
 (declaim (inline quadrant-of))
 (defun quadrant-of (root pt)
+  "Returns the quadrant of pt relative to root."
   (cond ((and (<= (vx pt) (vx root))
               (> (vy pt) (vy root)))
          'top-left)
@@ -86,6 +66,7 @@
          'bottom-right)))
 
 (defun opposite-quadrant (quad)
+  "Returns the quadrant 180 degrees from quad."
   (cond ((eq quad 'top-left)
          'bottom-right)
         ((eq quad 'top-right)

@@ -171,8 +171,34 @@
   (is-true (eq 'bottom-left  (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 -1.0))))
   (is-true (eq 'bottom-right (quadrant-of (vec2 0.0 0.0) (vec2 1.0 -1.0)))))
 
-(test in-range
-  (is-true  (in-range-p (vec2 5.0 5.0) 0.0 5.0 0.0 5.0))
-  (is-false (in-range-p (vec2 5.0 5.0) 0.0 5.0 0.0 1.0))
-  (is-false (in-range-p (vec2 5.0 5.0) 0.0 1.0 0.0 5.0))
-  (is-false (in-range-p (vec2 5.0 5.0) 0.0 1.0 0.0 1.0)))
+(test bounds
+  (let* ((bounds (from-point-range (vec2 0.0 0.0) 5.0))
+         (points (bounds-to-points bounds)))
+    (is-true (find (vec2 -5.0 -5.0) points :test #'v=))
+    (is-true (find (vec2 -5.0 5.0) points :test #'v=))
+    (is-true (find (vec2 5.0 5.0) points :test #'v=))
+    (is-true (find (vec2 5.0 -5.0) points :test #'v=))
+
+    (is-true  (inside-p (vec2 2.0 2.0) bounds))
+    (is-true  (inside-p (vec2 5.0 5.0) bounds))
+    (is-false  (inside-p (vec2 6.0 5.0) bounds))
+    (is-false  (inside-p (vec2 0.0 6.0) bounds))
+    (is-false  (inside-p (vec2 0.0 -6.0) bounds))
+    (is-false  (inside-p (vec2 -7.0 0.0) bounds))))
+
+(test entries
+  (let ((first-entry (make-entry (vec2 0.0 0.0) 42))
+        (second-entry (make-entry (vec2 2.0 1.0) 34)))
+    (add-value first-entry 76)
+    (is-true (contains first-entry 42 #'=))
+    (is-true (contains first-entry 76 #'=))
+    (is-false (contains first-entry 34 #'=))
+    (remove-value first-entry 76 #'=)
+    (is-false (contains first-entry 76 #'=))
+
+    (is-false (contains second-entry 42 #'=))
+    (is-false (contains second-entry 76 #'=))
+    (is-true (contains second-entry 34 #'=))
+    (is-true (is-point first-entry (vec2 0.0 0.0)))
+    (is-false (is-point first-entry (vec2 1.0 0.0)))
+    (is-true (is-point second-entry (vec2 2.0 1.0)))))
