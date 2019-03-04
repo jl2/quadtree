@@ -47,3 +47,24 @@
           (vec2 x-min y-max)
           (vec2 x-max y-min)
           (vec2 x-max y-max))))
+
+(defun split-bounds (bounds)
+  (with-slots (x-min x-max y-min y-max) bounds
+    (let ((x-mid (/ (+ x-max x-min) 2))
+          (y-mid (/ (+ y-max y-min) 2)))
+      (list (cons 'top-left (make-instance 'quadtree-bounds
+                                           :x-min x-min :x-max x-mid
+                                           :y-min y-min :y-max y-mid))
+            (cons 'top-right (make-instance 'quadtree-bounds
+                                            :x-min x-mid :x-max x-max
+                                            :y-min y-min :y-max y-mid))
+            (cons 'bottom-left (make-instance 'quadtree-bounds
+                                              :x-min x-min :x-max x-mid
+                                              :y-min y-mid :y-max y-max))
+            (cons 'bottom-right (make-instance 'quadtree-bounds
+                                               :x-min x-mid :x-max x-max
+                                               :y-min y-mid :y-max y-max))))))
+
+(defmethod print-object ((bound quadtree-bounds) stream)
+  (with-slots (x-min y-min x-max y-max) bound
+    (format stream "(make-bounds :x-min ~a :y-min ~a :x-max ~a :y-max ~a)" x-min y-min x-max y-max)))

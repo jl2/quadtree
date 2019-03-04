@@ -10,4 +10,8 @@ Copyright (c) 2019 Jeremiah LaRocco <jeremiah_larocco@fastmail.com>
 
 * Plan
 ** TODO pr-quadtree
+(defun split) recursively splits tree into 4
+split-count decides how big a quad gets before being split
+insert into list, split at split-coutn
 
+b

@@ -49,6 +49,9 @@
 (defgeneric remove-from (qt point)
   (:documentation "Remove item from quadtree at point, if it exists."))
 
+(defmethod qsize (qt)
+  (slot-value qt 'size))
+
 (declaim (inline quadrant-of))
 (defun quadrant-of (root pt)
   "Returns the quadrant of pt relative to root."

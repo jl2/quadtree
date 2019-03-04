@@ -28,7 +28,7 @@
 (def-suite :quadtree)
 (in-suite :quadtree)
 
-(test insert-and-size
+(test point-quadtree-insert-and-size
   (let ((qt (make-instance 'point-quadtree)))
 
     (insert qt (vec2 0.0 0.0) 42)
@@ -41,7 +41,7 @@
     (is-true (= (qsize qt) 3))))
 
 
-(test locate
+(test point-quadtree-locate
   (let ((rp1 (vec2-random 0.0 1.0))
         (rp2 (vec2-random 0.0 1.0))
         (rp3 (vec2-random 0.0 1.0))
@@ -63,7 +63,7 @@
       (is-true (= 2 (length lr)))
       (is-true (find rp3 lr :test #'v=)))))
 
-(test closest
+(test point-quadtree-closest
   (let ((qt (make-instance 'point-quadtree)))
     (is-true (null (closest qt (vec2 0.0 0.0))))
 
@@ -89,7 +89,7 @@
         (insert qt (vec2 i j) (* i j))))
     qt))
 
-(test range-find
+(test point-quadtree-range-find
   (let ((qt (make-instance 'point-quadtree)))
     (insert qt (vec2 0.0 0.0) 1)
     (insert qt (vec2 1.0 0.0) 2)
@@ -105,7 +105,7 @@
     (is-true (= 9 (length first-results)))
     (is-true (= 4 (length second-results)))))
 
-(test remove-item
+(test point-quadtree-remove-item
   (let ((qt (make-instance 'point-quadtree)))
 
     (insert qt (vec2-random 0.0 1.0) 100)
@@ -134,7 +134,7 @@
     (is-true (= 1 (qsize qt)))
     (is-true (= (vec2 10.0 10.0) (locate qt 42 #'=)))))
 
-(test remove-from
+(test point-quadtree-remove-from
   (let ((qt (make-instance 'point-quadtree)))
 
     (insert qt (vec2 0.0 0.0) 100)
@@ -171,7 +171,7 @@
   (is-true (eq 'bottom-left  (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 -1.0))))
   (is-true (eq 'bottom-right (quadrant-of (vec2 0.0 0.0) (vec2 1.0 -1.0)))))
 
-(test bounds
+(test quadtree-bounds
   (let* ((bounds (from-point-range (vec2 0.0 0.0) 5.0))
          (points (bounds-to-points bounds)))
     (is-true (find (vec2 -5.0 -5.0) points :test #'v=))
@@ -184,7 +184,12 @@
     (is-false  (inside-p (vec2 6.0 5.0) bounds))
     (is-false  (inside-p (vec2 0.0 6.0) bounds))
     (is-false  (inside-p (vec2 0.0 -6.0) bounds))
-    (is-false  (inside-p (vec2 -7.0 0.0) bounds))))
+    (is-false  (inside-p (vec2 -7.0 0.0) bounds))
+
+    (let ((new-bounds (split-bounds)))
+      (is-true (= (length new-bounds) 4))
+      ;; TODO Test actual boundaries
+      )))
 
 (test entries
   (let ((first-entry (make-entry (vec2 0.0 0.0) 42))
@@ -202,3 +207,22 @@
     (is-true (is-point first-entry (vec2 0.0 0.0)))
     (is-false (is-point first-entry (vec2 1.0 0.0)))
     (is-true (is-point second-entry (vec2 2.0 1.0)))))
+
+
+(defun test-tree (n)
+  (let ((pqt (make-instance 'quadtree:pr-quadtree)))
+    (dotimes (i n)
+      (quadtree:insert pqt (vec2 i i) i))
+    pqt))
+
+(test pr-quadtree-insert-and-size
+  (let ((qt (make-instance 'pr-quadtree)))
+    (is-true (= (qsize qt) 0))
+    (insert qt (vec2 0.0 0.0) 42)
+    (is-true (= (qsize qt) 1))
+
+    (insert qt (vec2 0.0 0.0) 44)
+    (is-true (= (qsize qt) 2))
+
+    (insert qt (vec2 1.0 0.0) 45)
+    (is-true (= (qsize qt) 3))))

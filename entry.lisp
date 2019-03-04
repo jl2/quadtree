@@ -41,3 +41,5 @@
   "Check if value is in entry."
   (find value (slot-value entry 'data) :test test))
 
+(defun from-existing (entry)
+  (make-instance 'quadtree-entry :point (slot-value entry 'point) :data (slot-value entry 'data)))

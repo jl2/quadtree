@@ -17,6 +17,50 @@
 (in-package :quadtree)
 
 (defclass pr-quadtree (quadtree)
-  (bounds :initarg :bounds :type quadtree-bounds))
+  ((bounds :initarg :bounds :initform (make-instance 'quadtree-bounds):type quadtree-bounds)
+   (split-size :initarg :split-size :initform 8 :type fixnum))
   (:documentation "A point-range quadtree, where space is subdivided into four equal parts at each level of the tree."))
 
+(defun needs-split (qt)
+  "Returns true when a quadtree has more than split-size entries."
+  (with-slots (entries split-size) qt
+    (format t "len ~a split-size ~a >= ~a~%" (length entries) split-size (>= (length entries) split-size))
+    (>= (length entries) split-size)))
+
+(defun split-quadtree (qt)
+  "Split a quadtree into 4 new nodes."
+  (with-slots (bounds entries split-size size top-left top-right bottom-left bottom-right) qt
+    (dolist (new-bound (split-bounds bounds))
+      (let ((quad-name (car new-bound))
+            (bound (cdr new-bound)))
+        (format t "name: ~a bound ~a~%" quad-name bound)
+        (setf (slot-value qt quad-name) (make-instance 'pr-quadtree :split-size split-size :bounds bound))
+        (dolist (entry entries)
+          (when (inside-p (slot-value entry 'point) bound)
+            (push entry (slot-value (slot-value qt quad-name) 'entries))))
+        (when (needs-split (slot-value qt quad-name))
+          (split-quadtree (slot-value qt quad-name)))))))
+
+
+(defmethod insert ((qt pr-quadtree) new-point new-item)
+  (with-slots (bounds entries split-size size top-left top-right bottom-left bottom-right) qt
+    (when (not (inside-p new-point bounds))
+      (error "~a is not inside quadtree bounds." new-point))
+    (cond
+      ;; Empty tree
+      ((every #'null (list entries top-left top-right bottom-left bottom-right))
+       (setf entries (list (make-entry new-point new-item))))
+
+      ;; Not empty but smaller than split-size
+      ((and (not (null entries)) (< (length entries) split-size))
+       (let ((existing-entry (find-if (rcurry #'is-point new-point) entries)))
+         (cond (existing-entry
+                (add-value existing-entry new-item))
+               (t
+                (push (make-entry new-point new-item) entries)
+                (when (needs-split qt)
+                  (split-quadtree qt))))))
+          (t
+           (let ((quad (quadrant-of (slot-value entries 'point) new-point)))
+             (insert (slot-value qt quad) new-point new-item))))
+        (incf size)))

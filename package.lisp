@@ -17,9 +17,11 @@
 (defpackage :quadtree
   (:use #:cl #:j-utils #:alexandria #:3d-vectors)
   (:export #:point-quadtree
+           #:pr-quadtree
            #:from-point-range
            #:inside-p
            #:bounds-to-points
+           #:split-bounds
            #:qsize
            #:locate
            #:closest
