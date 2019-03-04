@@ -18,6 +18,7 @@
   (:use #:cl #:j-utils #:alexandria #:3d-vectors)
   (:export #:point-quadtree
            #:pr-quadtree
+           #:quadtree-bounds
            #:from-point-range
            #:inside-p
            #:bounds-to-points

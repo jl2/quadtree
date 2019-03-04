@@ -25,5 +25,6 @@
                (:file "entry")
                (:file "bounds")
                (:file "quadtree")
-               (:file "point-quadtree"))
+               (:file "point-quadtree")
+               (:file "pr-quadtree"))
   :in-order-to ((test-op (test-op quadtree.test))))

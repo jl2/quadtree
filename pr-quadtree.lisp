@@ -21,10 +21,10 @@
    (split-size :initarg :split-size :initform 8 :type fixnum))
   (:documentation "A point-range quadtree, where space is subdivided into four equal parts at each level of the tree."))
 
+(declaim (inline needs-split))
 (defun needs-split (qt)
   "Returns true when a quadtree has more than split-size entries."
   (with-slots (entries split-size) qt
-    (format t "len ~a split-size ~a >= ~a~%" (length entries) split-size (>= (length entries) split-size))
     (>= (length entries) split-size)))
 
 (defun split-quadtree (qt)
@@ -33,14 +33,14 @@
     (dolist (new-bound (split-bounds bounds))
       (let ((quad-name (car new-bound))
             (bound (cdr new-bound)))
-        (format t "name: ~a bound ~a~%" quad-name bound)
-        (setf (slot-value qt quad-name) (make-instance 'pr-quadtree :split-size split-size :bounds bound))
+        (setf (slot-value qt quad-name)
+              (make-instance 'pr-quadtree :split-size split-size :bounds bound))
         (dolist (entry entries)
           (when (inside-p (slot-value entry 'point) bound)
             (push entry (slot-value (slot-value qt quad-name) 'entries))))
         (when (needs-split (slot-value qt quad-name))
-          (split-quadtree (slot-value qt quad-name)))))))
-
+          (split-quadtree (slot-value qt quad-name)))))
+        (setf entries nil)))
 
 (defmethod insert ((qt pr-quadtree) new-point new-item)
   (with-slots (bounds entries split-size size top-left top-right bottom-left bottom-right) qt
@@ -60,7 +60,7 @@
                 (push (make-entry new-point new-item) entries)
                 (when (needs-split qt)
                   (split-quadtree qt))))))
-          (t
-           (let ((quad (quadrant-of (slot-value entries 'point) new-point)))
-             (insert (slot-value qt quad) new-point new-item))))
-        (incf size)))
+      (t
+       (let ((quad (quadrant-of (midpoint bounds) new-point)))
+         (insert (slot-value qt quad) new-point new-item))))
+    (incf size)))

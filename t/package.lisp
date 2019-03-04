@@ -45,7 +45,6 @@
   (let ((rp1 (vec2-random 0.0 1.0))
         (rp2 (vec2-random 0.0 1.0))
         (rp3 (vec2-random 0.0 1.0))
-        (rp4 (vec2-random 0.0 1.0))
         (qt (make-instance 'point-quadtree)))
 
     (insert qt rp1 42)
@@ -102,7 +101,7 @@
   (let* ((qt (build-grid-quadtree 'point-quadtree 5 5))
          (first-results (range-find qt (vec2 2 2) 1.0))
          (second-results (range-find qt (vec2 2.5 2.5) 1.0)))
-    (is-true (= 9 (length first-results)))
+    (is-true (= 4 (length first-results)))
     (is-true (= 4 (length second-results)))))
 
 (test point-quadtree-remove-item
@@ -132,7 +131,7 @@
     (is-true (= 2 (qsize qt)))
     (remove-item qt 41 #'=)
     (is-true (= 1 (qsize qt)))
-    (is-true (= (vec2 10.0 10.0) (locate qt 42 #'=)))))
+    (is-true (v= (vec2 10.0 10.0) (locate qt 42 #'=)))))
 
 (test point-quadtree-remove-from
   (let ((qt (make-instance 'point-quadtree)))
@@ -179,17 +178,16 @@
     (is-true (find (vec2 5.0 5.0) points :test #'v=))
     (is-true (find (vec2 5.0 -5.0) points :test #'v=))
 
-    (is-true  (inside-p (vec2 2.0 2.0) bounds))
-    (is-true  (inside-p (vec2 5.0 5.0) bounds))
-    (is-false  (inside-p (vec2 6.0 5.0) bounds))
-    (is-false  (inside-p (vec2 0.0 6.0) bounds))
-    (is-false  (inside-p (vec2 0.0 -6.0) bounds))
-    (is-false  (inside-p (vec2 -7.0 0.0) bounds))
+    (is-true  (inside-p (vec2 2.5 2.5) bounds))
+    (is-true  (inside-p (vec2 2.5 -2.5) bounds))
+    (is-true  (inside-p (vec2 -2.5 2.5) bounds))
+    (is-true  (inside-p (vec2 -2.5 -2.5) bounds))
+    (let ((sb (split-bounds bounds)))
+      (is-true (inside-p (vec2 2.5 2.5) (cdr (assoc 'quadtree:top-right sb))))
+      (is-true (inside-p (vec2 -2.5 2.5) (cdr (assoc 'quadtree:top-left sb))))
+      (is-true (inside-p (vec2 2.5 -2.5) (cdr (assoc 'quadtree:bottom-right sb))))
+      (is-true (inside-p (vec2 -2.5 -2.5) (cdr (assoc 'quadtree:bottom-left sb)))))))
 
-    (let ((new-bounds (split-bounds)))
-      (is-true (= (length new-bounds) 4))
-      ;; TODO Test actual boundaries
-      )))
 
 (test entries
   (let ((first-entry (make-entry (vec2 0.0 0.0) 42))

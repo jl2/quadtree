@@ -23,7 +23,7 @@
    (y-max :initarg :y-max :initform 1000.0 :type double-float))
   (:documentation "Quadtree node boundary"))
 
-(declaim (inline from-point-range inside-p bounds-to-points))
+(declaim (inline from-point-range inside-p bounds-to-points midpoint))
 (defun from-point-range (point range)
   "Create a quadtree-bounds centered at point extending to ± range in each direction."
   (make-instance 'quadtree-bounds
@@ -35,8 +35,8 @@
 (defun inside-p (point bounds)
   "Check if point is inside bounds."
   (with-slots (x-min y-min x-max y-max) bounds
-    (and (<= (vx point) x-max)
-         (<= (vy point) y-max)
+    (and (< (vx point) x-max)
+         (< (vy point) y-max)
          (>= (vx point) x-min)
          (>= (vy point) y-min))))
 
@@ -53,18 +53,23 @@
     (let ((x-mid (/ (+ x-max x-min) 2))
           (y-mid (/ (+ y-max y-min) 2)))
       (list (cons 'top-left (make-instance 'quadtree-bounds
-                                           :x-min x-min :x-max x-mid
-                                           :y-min y-min :y-max y-mid))
-            (cons 'top-right (make-instance 'quadtree-bounds
-                                            :x-min x-mid :x-max x-max
-                                            :y-min y-min :y-max y-mid))
-            (cons 'bottom-left (make-instance 'quadtree-bounds
                                               :x-min x-min :x-max x-mid
                                               :y-min y-mid :y-max y-max))
-            (cons 'bottom-right (make-instance 'quadtree-bounds
+            (cons 'top-right (make-instance 'quadtree-bounds
                                                :x-min x-mid :x-max x-max
-                                               :y-min y-mid :y-max y-max))))))
+                                               :y-min y-mid :y-max y-max))
+            (cons 'bottom-left (make-instance 'quadtree-bounds
+                                           :x-min x-min :x-max x-mid
+                                           :y-min y-min :y-max y-mid))
+            (cons 'bottom-right (make-instance 'quadtree-bounds
+                                            :x-min x-mid :x-max x-max
+                                            :y-min y-min :y-max y-mid))))))
 
 (defmethod print-object ((bound quadtree-bounds) stream)
   (with-slots (x-min y-min x-max y-max) bound
     (format stream "(make-bounds :x-min ~a :y-min ~a :x-max ~a :y-max ~a)" x-min y-min x-max y-max)))
+
+(defun midpoint (bounds)
+  (with-slots (x-min y-min x-max y-max) bounds
+    (vec2 (/ (+ x-max x-min) 2)
+          (/ (+ y-max y-min) 2))))
