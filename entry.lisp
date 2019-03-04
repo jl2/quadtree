@@ -23,7 +23,7 @@
 (defmethod print-object ((entry quadtree-entry) stream)
   (with-slots (point data) entry
     (format stream "(make-quadtree-entry :point ~a :data '(~{~a~^ ~}))" point data)))
-    
+
 (declaim (inline make-entry add-value remove-value is-point contains))
 (defun make-entry (point data)
   "Create a new quadtree entry."
