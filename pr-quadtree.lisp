@@ -17,7 +17,8 @@
 (in-package :quadtree)
 
 (defclass pr-quadtree (quadtree)
-  ((bounds :initarg :bounds :initform (make-instance 'quadtree-bounds):type quadtree-bounds)
+  ((entries :initform nil :type (or null cons))
+   (bounds :initarg :bounds :initform (make-instance 'quadtree-bounds):type quadtree-bounds)
    (split-size :initarg :split-size :initform 8 :type fixnum))
   (:documentation "A point-range quadtree, where space is subdivided into four equal parts at each level of the tree."))
 
@@ -64,3 +65,21 @@
        (let ((quad (quadrant-of (midpoint bounds) new-point)))
          (insert (slot-value qt quad) new-point new-item))))
     (incf size)))
+
+
+(defmethod range-find ((qt pr-quadtree) search-point range)
+  (let ((bounds (from-point-range search-point range)))
+    (labels
+        ((rfind (qt)
+           (with-slots (entry size) qt
+             (let* ((quadrants (mapcar (curry #'quadrant-of (slot-value entry 'point))
+                                       (bounds-to-points bounds)))
+                    (unique-quads (remove-duplicates quadrants :test #'equal))
+                    (rvals (loop
+                              for quad in unique-quads
+                              when (slot-value qt quad)
+                              append (rfind (slot-value qt quad)))))
+               (if (inside-p (slot-value entry 'point) bounds)
+                 (cons entry rvals)
+                 rvals)))))
+      (rfind qt))))

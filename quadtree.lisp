@@ -17,7 +17,7 @@
 (in-package :quadtree)
 
 (defclass quadtree ()
-  ((entries :initform nil :type (or null cons quadtree-entry))
+  (
    (size :initform 0 :type fixnum)
    (top-left :initform nil :type (or null quadtree))
    (top-right :initform nil :type (or null quadtree))
