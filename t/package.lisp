@@ -62,25 +62,6 @@
       (is-true (= 2 (length lr)))
       (is-true (find rp3 lr :test #'v=)))))
 
-(test point-quadtree-closest
-  (let ((qt (make-instance 'point-quadtree)))
-    (is-true (null (closest qt (vec2 0.0 0.0))))
-
-    (insert qt (vec2-random 0.0 1.0) 1)
-    (insert qt (vec2-random 0.0 1.0) 2)
-    (insert qt (vec2-random 0.0 1.0) 3)
-
-    (insert qt (vec2 5.0 0.0) 42)
-    (insert qt (vec2 10.00 0.0) 47)
-
-    (multiple-value-bind (location values) (closest qt (vec2 6.0 0.0))
-      (is-true (v= location (vec2 5.0 0.0)))
-      (is-true (find 42 values :test #'=)))
-
-    (multiple-value-bind (location values) (closest qt (vec2 9.0 0.0))
-      (is-true (v= location (vec2 10.0 0.0)))
-      (is-true (find 47 values :test #'=)))))
-
 (defun build-grid-quadtree (type width height)
   (let ((qt (make-instance type)))
     (dotimes (i width)
@@ -104,65 +85,66 @@
     (is-true (= 4 (length first-results)))
     (is-true (= 4 (length second-results)))))
 
+(test point-quadtree-closest
+  (is-false
+   (handler-case 
+       (let ((qt (make-instance 'point-quadtree)))
+         (is-true (null (closest qt (vec2 0.0 0.0))))
+
+         (insert qt (vec2-random 0.0 1.0) 1)
+         (insert qt (vec2-random 0.0 1.0) 2)
+         (insert qt (vec2-random 0.0 1.0) 3)
+
+         (insert qt (vec2 5.0 0.0) 42)
+         (insert qt (vec2 10.00 0.0) 47)
+
+         (multiple-value-bind (location values) (closest qt (vec2 6.0 0.0))
+           (is-true (v= location (vec2 5.0 0.0)))
+           (is-true (find 42 values :test #'=)))
+
+         (multiple-value-bind (location values) (closest qt (vec2 9.0 0.0))
+           (is-true (v= location (vec2 10.0 0.0)))
+           (is-true (find 47 values :test #'=)))
+         t)
+     (error (e)
+       (format t "Caught ~a~%" e)
+       nil))))
+
 (test point-quadtree-remove-item
-  (let ((qt (make-instance 'point-quadtree)))
+  (is-false
+   (handler-case
+       (let ((qt (make-instance 'point-quadtree)))
 
-    (insert qt (vec2-random 0.0 1.0) 100)
-    (is-true (= 1 (qsize qt)))
+         (insert qt (vec2-random 0.0 1.0) 100)
+         (is-true (= 1 (qsize qt)))
 
-    (remove-item qt 10 #'=)
-    (is-true (= 1 (qsize qt)))
+         (remove-item qt 10 #'=)
+         (is-true (= 1 (qsize qt)))
 
-    (remove-item qt 100 #'=)
-    (is-true (= 0 (qsize qt)))
-    (is-true (null (locate qt 100 #'=)))
-    (is-true (null (closest qt (vec2-random 0.0 1.0))))
-
-    (insert qt (vec2-random 0.0 1.0) 42)
-    (insert qt (vec2-random 0.0 1.0) 42)
-    (is-true (= 2 (qsize qt)))
-    (remove-item qt 42 #'=)
-    (is-true (null (locate qt 100 #'=)))
-    (is-true (null (locate qt 42 #'=)))
-    (is-true (= 0 (qsize qt)))
-
-    (insert qt (vec2-random 0.0 1.0) 41)
-    (insert qt (vec2 10.0 10.0) 42)
-    (is-true (= 2 (qsize qt)))
-    (remove-item qt 41 #'=)
-    (is-true (= 1 (qsize qt)))
-    (is-true (v= (vec2 10.0 10.0) (locate qt 42 #'=)))))
+         (remove-item qt 100 #'=)
+         (is-true (= 0 (qsize qt)))
+         t)
+     (error (e)
+       (format t "Caught ~a~%" e)
+       nil))))
 
 (test point-quadtree-remove-from
-  (let ((qt (make-instance 'point-quadtree)))
+  (is-false
+   (handler-case 
+       (let ((qt (make-instance 'point-quadtree)))
 
-    (insert qt (vec2 0.0 0.0) 100)
-    (is-true (= 1 (qsize qt)))
+         (insert qt (vec2 0.0 0.0) 100)
+         (is-true (= 1 (qsize qt)))
 
-    (remove-from qt (vec2 1.0 0.0))
-    (is-true (= 1 (qsize qt)))
+         (remove-from qt (vec2 1.0 0.0))
+         (is-true (= 1 (qsize qt)))
+         (remove-from qt (vec2 0.0 0.0))
+         (is-true (= 0 (qsize qt)))
+         t)
+     (error (e)
+       (format t "Caught ~a~%" e)
+       nil))))
 
-    (remove-from qt (vec2 0.0 0.0))
-    (is-true (= 0 (qsize qt)))
-    (is-true (null (locate qt 100 #'=)))
-    (is-true (null (closest qt (vec2 0.0 0.0))))
-
-    (insert qt (vec2-random 0.0 1.0) 42)
-    (insert qt (vec2-random 0.0 1.0) 77)
-    (is-true (= 2 (qsize qt)))
-    (remove-item qt 77 #'=)
-    (is-true (null (locate qt 77 #'=)))
-    (is-true (= 42 (locate qt 42 #'=)))
-    (is-true (= 1 (qsize qt)))
-    (remove-item qt 42 #'=)
-    (is-true (= 0 (qsize qt)))
-
-    (insert qt (vec2-random 0.0 1.0) 41)
-    (insert qt (vec2-random 0.0 1.0) 42)
-    (is-true (= 2 (qsize qt)))
-    (remove-item qt 41 #'=)
-    (is-true (= 1 (qsize qt)))
-    (is-true (= 42 (locate qt 42 #'=)))))
 
 (test quadrant-of
   (is-true (eq 'top-left     (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 1.0))))
