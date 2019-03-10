@@ -43,4 +43,5 @@
            #:add-value
            #:contains
            #:view-quadtree
-           #:random-quadtree))
+           #:random-quadtree
+           #:parametric-quadtree))

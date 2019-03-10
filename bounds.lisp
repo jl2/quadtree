@@ -37,7 +37,7 @@
   (with-slots (x-min y-min x-max y-max) bounds
     (and (< (vx point) x-max)
          (< (vy point) y-max)
-         (>= (vx point) x-min)
+         (>= (vx point) x-min )
          (>= (vy point) y-min))))
 
 (defun bounds-to-points (bounds)

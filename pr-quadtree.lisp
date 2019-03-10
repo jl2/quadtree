@@ -31,18 +31,18 @@
 
 (defun split-quadtree (qt)
   "Split a quadtree into 4 new nodes."
-  (with-slots (bounds entries size top-left top-right bottom-left bottom-right) qt
+  (with-slots (bounds entries size) qt
     (dolist (new-bound (split-bounds bounds))
       (let ((quad-name (car new-bound))
-            (bound (cdr new-bound)))
-        (setf (slot-value qt quad-name)
-              (make-instance 'pr-quadtree :bounds bound))
+            (this-bound (cdr new-bound)))
+        (setf (slot-value qt quad-name) (make-instance 'pr-quadtree :bounds this-bound))
         (dolist (entry entries)
-          (when (inside-p (slot-value entry 'point) bound)
+          (when (inside-p (slot-value entry 'point) this-bound)
+            (incf (slot-value (slot-value qt quad-name) 'size))
             (push entry (slot-value (slot-value qt quad-name) 'entries))))
         (when (needs-split (slot-value qt quad-name))
           (split-quadtree (slot-value qt quad-name)))))
-        (setf entries nil)))
+    (setf entries nil)))
 
 (defmethod insert ((qt pr-quadtree) new-point new-item)
   (with-slots (bounds entries size top-left top-right bottom-left bottom-right) qt
@@ -101,7 +101,9 @@
                       &key
                         (width 1200) (height 1200)
                         (open-png t)
-                        (line-width 0.8))
+                        (x-scale 1.0)
+                        (y-scale 1.0)
+                        (line-width 1.5))
   "Test writing a PNG file with Cairo."
     (let ((real-file-name (home-dir png-file-name))
           (half-width (/ width 2.0))
@@ -110,8 +112,9 @@
       (cl-cairo2:with-png-file (real-file-name :argb32 width height)
         (cl-cairo2:set-source-rgba 0.0 0.0 0.0 1.0)
         (cl-cairo2:paint)
-        (cl-cairo2:set-line-width line-width)
+        (cl-cairo2:set-line-width (/ line-width x-scale))
         (cl-cairo2:translate half-width half-height)
+        (cl-cairo2:scale x-scale y-scale)
         (labels
             ((draw-quadtree (qt)
                (with-slots (entries bounds) qt
@@ -120,7 +123,7 @@
 
                  (dolist (entry entries)
                    (cl-cairo2:set-source-rgba 1 0 0 1.0)
-                   (draw-point (slot-value entry 'point) 2))
+                   (draw-point (slot-value entry 'point) (/ 2 x-scale)))
 
                  (loop for quad in '(top-left bottom-left top-right bottom-right)
                     for sub-tree = (slot-value qt quad) then (slot-value qt quad)
@@ -148,6 +151,26 @@
                      (+ (vy pt) size))
   (cl-cairo2:move-to (+ (vx pt) size)
                      (- (vy pt) size))
-  (cl-cairo2:line-to (+ (vx pt) size)
+  (cl-cairo2:line-to (- (vx pt) size)
                      (+ (vy pt) size))
   (cl-cairo2:stroke))
+
+(defun parametric-quadtree (&key
+                       (t-min (- pi))
+                       (t-max pi)
+                       (steps 1000)
+                       (xf #'identity)
+                       (yf #'sin)
+                       (bounds (make-instance 'quadtree:quadtree-bounds
+                                              :x-min (* -1.5 pi)
+                                              :x-max (* 1.5 pi)
+                                              :y-min -2.0
+                                              :y-max 2.0)))
+  (let* ((steps 1000)
+         (qt (make-instance 'quadtree:pr-quadtree :bounds bounds))
+         (dt (/ (- t-max t-min) steps)))
+    (loop for i below 1000
+       for tv = (+ t-min (* dt i))
+       do 
+         (quadtree:insert qt (vec2 (funcall xf tv) (funcall yf tv)) i))
+    qt))
