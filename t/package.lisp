@@ -206,3 +206,22 @@
 
     (insert qt (vec2 1.0 0.0) 45)
     (is-true (= (qsize qt) 3))))
+
+
+(test pr-quadtree-range-find
+  (let ((qt (make-instance 'pr-quadtree)))
+    (insert qt (vec2 0.0 0.0) 1)
+    (insert qt (vec2 1.0 0.0) 2)
+    (insert qt (vec2 2.0 0.0) 3)
+    (insert qt (vec2 3.0 0.0) 4)
+    (insert qt (vec2 4.0 0.0) 5)
+    (insert qt (vec2 5.0 0.0) 6)
+    (is-true (= 2 (length (range-find qt (vec2 2.5 0.0) 1.0)))))
+
+  (let* ((qt (build-grid-quadtree 'pr-quadtree 5 5))
+         (first-results (range-find qt (vec2 2 2) 1.0))
+         (second-results (range-find qt (vec2 2.5 2.5) 1.0)))
+    (is-true (= 4 (length first-results)))
+    (is-true (= 4 (length second-results)))))
+
+

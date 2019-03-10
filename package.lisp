@@ -41,4 +41,6 @@
            #:is-point
            #:remove-value
            #:add-value
-           #:contains))
+           #:contains
+           #:view-quadtree
+           #:random-quadtree))

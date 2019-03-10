@@ -80,3 +80,9 @@
          'top-left)
         (t (error "Unknown quadrant! ~a" quad))))
 
+
+(defun random-quadtree (type radius count)
+  (let ((qt (make-instance type)))
+    (dotimes (i count)
+      (quadtree:insert qt (vec2-random (- radius) radius) i))
+    qt))
