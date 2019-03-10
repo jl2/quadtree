@@ -44,4 +44,5 @@
            #:contains
            #:view-quadtree
            #:random-quadtree
-           #:parametric-quadtree))
+           #:parametric-quadtree
+           #:parametric-animation))

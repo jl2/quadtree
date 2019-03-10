@@ -156,8 +156,8 @@
   (cl-cairo2:stroke))
 
 (defun parametric-quadtree (&key
-                       (t-min (- pi))
-                       (t-max pi)
+                       (t-min 0.0)
+                       (t-max (* 2 pi))
                        (steps 1000)
                        (xf #'identity)
                        (yf #'sin)
@@ -166,11 +166,36 @@
                                               :x-max (* 1.5 pi)
                                               :y-min -2.0
                                               :y-max 2.0)))
-  (let* ((steps 1000)
-         (qt (make-instance 'quadtree:pr-quadtree :bounds bounds))
+  (let* ((qt (make-instance 'quadtree:pr-quadtree :bounds bounds))
          (dt (/ (- t-max t-min) steps)))
-    (loop for i below 1000
+    (loop for i below steps
        for tv = (+ t-min (* dt i))
        do 
          (quadtree:insert qt (vec2 (funcall xf tv) (funcall yf tv)) i))
     qt))
+
+(defun parametric-animation (output-directory
+                        &key
+                          (t-min 0.0)
+                          (t-max (* 2 pi))
+                          (width 1200)
+                          (height 1200)
+                          (xf (lambda (tv) (* 20.0 (sin tv) (sin (* 2 tv)))))
+                          (yf (lambda (tv) (* 20.0 (cos tv) (sin (* 2 tv)))))
+                          (bounds (make-instance 'quadtree:quadtree-bounds
+                                                 :x-min -25.0
+                                                 :x-max 25.0
+                                                 :y-min -25.0
+                                                 :y-max 25.0))
+                          (x-scale 20.0)
+                          (y-scale 20.0)
+                          (frames 60))
+  (dotimes (i frames)
+    (let ((qt (quadtree:parametric-quadtree :t-min t-min
+                                            :t-max t-max
+                                            :steps (+ *split-size* (* i *split-size*))
+                                            :xf xf
+                                            :yf yf
+                                            :bounds bounds))
+          (file-name (format nil "~aframe~5,'0d.png" output-directory i)))
+      (quadtree:view-quadtree qt file-name :x-scale x-scale :y-scale y-scale :width width :height height :open-png nil))))

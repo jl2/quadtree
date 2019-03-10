@@ -107,7 +107,6 @@
            (is-true (find 47 values :test #'=)))
          t)
      (error (e)
-       (format t "Caught ~a~%" e)
        nil))))
 
 (test point-quadtree-remove-item
@@ -125,7 +124,6 @@
          (is-true (= 0 (qsize qt)))
          t)
      (error (e)
-       (format t "Caught ~a~%" e)
        nil))))
 
 (test point-quadtree-remove-from
@@ -142,7 +140,6 @@
          (is-true (= 0 (qsize qt)))
          t)
      (error (e)
-       (format t "Caught ~a~%" e)
        nil))))
 
 
