@@ -27,7 +27,7 @@
 (defun needs-split (qt)
   "Returns true when a quadtree has more than *split-size* entries."
   (with-slots (entries) qt
-    (>= (length entries) *split-size*)))
+    (> (length entries) *split-size*)))
 
 (defun split-quadtree (qt)
   "Split a quadtree into 4 new nodes."
@@ -54,7 +54,7 @@
        (setf entries (list (make-entry new-point new-item))))
 
       ;; Not empty but smaller than *split-size*
-      ((and (not (null entries)) (< (length entries) *split-size*))
+      ((and (not (null entries)) (not (needs-split qt)))
        (let ((existing-entry (find-if (rcurry #'is-point new-point) entries)))
          (cond (existing-entry
                 (add-value existing-entry new-item))
@@ -91,111 +91,3 @@
 
 
 
-
-(defun home-dir (path)
-  "Utility function to make relative path names relative to the user's home directory to work around Cairo weirdness."
-  (merge-pathnames path (user-homedir-pathname)))
-
-(defun view-quadtree (qt
-                      png-file-name
-                      &key
-                        (width 1200) (height 1200)
-                        (open-png t)
-                        (x-scale 1.0)
-                        (y-scale 1.0)
-                        (line-width 1.5))
-  "Test writing a PNG file with Cairo."
-    (let ((real-file-name (home-dir png-file-name))
-          (half-width (/ width 2.0))
-          (half-height (/ height 2.0)))
-      (ensure-directories-exist real-file-name)
-      (cl-cairo2:with-png-file (real-file-name :argb32 width height)
-        (cl-cairo2:set-source-rgba 0.0 0.0 0.0 1.0)
-        (cl-cairo2:paint)
-        (cl-cairo2:set-line-width (/ line-width x-scale))
-        (cl-cairo2:translate half-width half-height)
-        (cl-cairo2:scale x-scale y-scale)
-        (labels
-            ((draw-quadtree (qt)
-               (with-slots (entries bounds) qt
-                 (cl-cairo2:set-source-rgba 0 1 0 1.0)
-                 (draw-bound bounds)
-
-                 (dolist (entry entries)
-                   (cl-cairo2:set-source-rgba 1 0 0 1.0)
-                   (draw-point (slot-value entry 'point) (/ 2 x-scale)))
-
-                 (loop for quad in '(top-left bottom-left top-right bottom-right)
-                    for sub-tree = (slot-value qt quad) then (slot-value qt quad)
-                    when (and sub-tree (not (zerop (qsize sub-tree))))
-                    do
-                      (draw-quadtree sub-tree)))))
-          (draw-quadtree qt)))
-      (when open-png
-        (swank:eval-in-emacs (list 'find-file-other-window (namestring real-file-name))))))
-
-(defun draw-bound (bnd)
-  (with-slots (x-min y-min x-max y-max) bnd
-    (cl-cairo2:move-to x-min y-min)
-    (cl-cairo2:line-to x-max y-min)
-    (cl-cairo2:line-to x-max y-max)
-    (cl-cairo2:line-to x-min y-max)
-    (cl-cairo2:line-to x-min y-min)
-    (cl-cairo2:stroke)))
-
-(defun draw-point (pt size)
-  
-  (cl-cairo2:move-to (- (vx pt) size)
-                     (- (vy pt) size))
-  (cl-cairo2:line-to (+ (vx pt) size)
-                     (+ (vy pt) size))
-  (cl-cairo2:move-to (+ (vx pt) size)
-                     (- (vy pt) size))
-  (cl-cairo2:line-to (- (vx pt) size)
-                     (+ (vy pt) size))
-  (cl-cairo2:stroke))
-
-(defun parametric-quadtree (&key
-                       (t-min 0.0)
-                       (t-max (* 2 pi))
-                       (steps 1000)
-                       (xf #'identity)
-                       (yf #'sin)
-                       (bounds (make-instance 'quadtree:quadtree-bounds
-                                              :x-min (* -1.5 pi)
-                                              :x-max (* 1.5 pi)
-                                              :y-min -2.0
-                                              :y-max 2.0)))
-  (let* ((qt (make-instance 'quadtree:pr-quadtree :bounds bounds))
-         (dt (/ (- t-max t-min) steps)))
-    (loop for i below steps
-       for tv = (+ t-min (* dt i))
-       do 
-         (quadtree:insert qt (vec2 (funcall xf tv) (funcall yf tv)) i))
-    qt))
-
-(defun parametric-animation (output-directory
-                        &key
-                          (t-min 0.0)
-                          (t-max (* 2 pi))
-                          (width 1200)
-                          (height 1200)
-                          (xf (lambda (tv) (* 20.0 (sin tv) (sin (* 2 tv)))))
-                          (yf (lambda (tv) (* 20.0 (cos tv) (sin (* 2 tv)))))
-                          (bounds (make-instance 'quadtree:quadtree-bounds
-                                                 :x-min -25.0
-                                                 :x-max 25.0
-                                                 :y-min -25.0
-                                                 :y-max 25.0))
-                          (x-scale 20.0)
-                          (y-scale 20.0)
-                          (frames 60))
-  (dotimes (i frames)
-    (let ((qt (quadtree:parametric-quadtree :t-min t-min
-                                            :t-max t-max
-                                            :steps (+ *split-size* (* i *split-size*))
-                                            :xf xf
-                                            :yf yf
-                                            :bounds bounds))
-          (file-name (format nil "~aframe~5,'0d.png" output-directory i)))
-      (quadtree:view-quadtree qt file-name :x-scale x-scale :y-scale y-scale :width width :height height :open-png nil))))
