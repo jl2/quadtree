@@ -62,13 +62,6 @@
       (is-true (= 2 (length lr)))
       (is-true (find rp3 lr :test #'v=)))))
 
-(defun build-grid-quadtree (type width height)
-  (let ((qt (make-instance type)))
-    (dotimes (i width)
-      (dotimes (j height)
-        (insert qt (vec2 i j) (* i j))))
-    qt))
-
 (test point-quadtree-range-find
   (let ((qt (make-instance 'point-quadtree)))
     (insert qt (vec2 0.0 0.0) 1)

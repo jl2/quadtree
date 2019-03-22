@@ -48,6 +48,19 @@
           (vec2 x-max y-min)
           (vec2 x-max y-max))))
 
+(defun random-point-in (bounds)
+  "Return a list of four boundary points."
+  (with-slots (x-min y-min x-max y-max) bounds
+    (vec2 (+ x-min (* (- x-max x-min) (random 1.0)))
+          (+ y-min (* (- y-max y-min) (random 1.0))))))
+
+(defun random-points-in (bounds count)
+  "Return a list of four boundary points."
+  (with-slots (x-min y-min x-max y-max) bounds
+    (loop for i below count collecting
+         (vec2 (+ x-min (* (- x-max x-min) (random 1.0)))
+               (+ y-min (* (- y-max y-min) (random 1.0)))))))
+
 (defun split-bounds (bounds)
   (with-slots (x-min x-max y-min y-max) bounds
     (let ((x-mid (/ (+ x-max x-min) 2))

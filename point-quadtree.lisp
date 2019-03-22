@@ -21,6 +21,7 @@
   (:documentation "A point quadtree, where space is subdivided at each point."))
 
 (defmethod insert ((qt point-quadtree) new-point new-item)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (with-slots (entry size) qt
     (incf size)
     (cond ((null entry)
@@ -36,6 +37,7 @@
              (insert (slot-value qt quad) new-point new-item))))))
 
 (defmethod depth-first ((qt point-quadtree) function)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (with-slots (entry size top-left top-right bottom-left bottom-right) qt
     (when top-left
       (depth-first top-left function))
@@ -49,6 +51,7 @@
       (funcall function entry))))
 
 (defmethod locate ((qt point-quadtree) the-item test)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((results nil))
     (depth-first
      qt
@@ -61,6 +64,7 @@
   (error "Not implemented."))
 
 (defmethod range-find ((qt point-quadtree) search-point range)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((bounds (from-point-range search-point range)))
     (labels
         ((rfind (qt)

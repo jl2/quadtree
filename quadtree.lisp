@@ -28,6 +28,7 @@
 (defgeneric qsize (qt)
   (:documentation "Returns the number of points in the quadtree."))
 
+(declaim (inline insert locate depth-first closest range-find remove-item remove-from qsize))
 (defgeneric insert (qt point new-item)
   (:documentation "Inserts item into qt at point.  Duplicates are allowed."))
 
@@ -90,11 +91,6 @@
         (t (error "Unknown quadrant! ~a" quad))))
 
 
-(defun random-quadtree (type radius count)
-  (let ((qt (make-instance type)))
-    (dotimes (i count)
-      (quadtree:insert qt (vec2-random (- radius) radius) i))
-    qt))
 (defun parametric-quadtree (&key
                               (type 'pr-quadtree)
                               (t-min 0.0)
@@ -145,12 +141,70 @@
           (file-name (format nil "~aframe~5,'0d.png" output-directory i)))
       (quadtree:view-quadtree qt file-name :x-scale x-scale :y-scale y-scale :width width :height height :open-png nil))))
 
-;; (defun benchmark-quadtree-search ()
-;;   (dotimes (i 16)
-;;     (let* ((quadtree::*split-size* (* (1+ i) 2))
-;;            (qt (quadtree:parametric-quadtree)))
-;;       (dotimes (i 10)
-;;         (let ((pt (vec2-random -10.0 10.0))
-;;               (rg (+ 0.1 (random 10.0))))
-;;           (let ((results (quadtree:range-find qt pt rg )))
-;;             ))))))
+(defun insert-random-points (qt count bounds)
+  (loop
+     for pt in (random-points-in bounds count)
+     do
+       (insert qt pt 0)))
+
+(defun random-quadtree (type radius count)
+  (let* ((bounds (from-point-range (vec2 0.0 0.0) radius))
+         (qt (if (eq type 'point-quadtree)
+                 (make-instance 'point-quadtree)
+                 (make-instance 'pr-quadtree :bounds bounds))))
+    (insert-random-points qt count bounds )
+    qt))
+
+
+
+(defun benchmark-random-pr-quadtree-search ( point-count find-count)
+  (dotimes (i 16)
+    (let* ((quadtree::*split-size* (* (1+ i) 2))
+           (radius 100.0))
+      (format t "Split size: ~a~%Building quadtree of size ~a" quadtree::*split-size* point-count)
+      (let ((qt (time (random-quadtree 'pr-quadtree radius point-count))))
+        (format t "Performing ~a random range-finds~%" find-count)
+        (time
+         (dotimes (i find-count)
+           (let ((pt (vec2-random (- radius) radius))
+                 (rg (+ 0.1 (random radius))))
+             (quadtree:range-find qt pt rg ))))
+        qt))))
+
+(defun benchmark-random-point-quadtree-search ( point-count find-count)
+  (let* ((radius 100.0))
+    (format t "Building quadtree of size ~a" point-count)
+    (let ((qt (time (random-quadtree 'point-quadtree radius point-count))))
+      (format t "Performing ~a random range-finds~%" find-count)
+      (time
+       (dotimes (i find-count)
+         (let ((pt (vec2-random (- radius) radius))
+               (rg (+ 0.1 (random radius))))
+           (quadtree:range-find qt pt rg ))))
+      qt)))
+
+(defun build-grid-quadtree (type bounds x-count y-count)
+  (with-slots (x-min x-max y-min y-max) bounds
+    (let ((qt (if (equal type 'point-quadtree)
+                (make-instance 'point-quadtree)
+                (make-instance 'pr-quadtree :bounds bounds)))
+          (dx (/ (- x-max x-min) x-count))
+          (dy (/ (- y-max x-min) y-count)))
+      (dotimes (i x-count)
+        (let ((x-value (+ x-min (* dx i))))
+          (dotimes (j y-count)
+            (let ((y-value (+ y-min (* dy j))))
+              (insert qt (vec2 x-value y-value) 0)))))
+      qt)))
+(defun benchmark-grid-quadtree-search (x-count y-count find-count)
+  (let* ((radius 100.0)
+         (bounds (from-point-range (vec2 0.0 0.0) radius))
+         (pt-qt (build-grid-quadtree 'point-quadtree bounds x-count y-count))
+         (pr-qt (build-grid-quadtree 'pr-quadtree bounds x-count y-count)))
+    (dotimes (i find-count)
+      (let* ((pt (vec2-random (- radius) radius))
+            (rg (+ 0.1 (random radius)))
+            (pt-find (quadtree:range-find pt-qt pt rg ))
+            (pr-find (quadtree:range-find pr-qt pt rg )))
+        (assert (= (length pt-find) (length pr-find)))))
+    (values pt-qt pr-qt)))

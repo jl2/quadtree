@@ -26,11 +26,13 @@
 (declaim (inline needs-split))
 (defun needs-split (qt)
   "Returns true when a quadtree has more than *split-size* entries."
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (with-slots (entries) qt
     (> (length entries) *split-size*)))
 
 (defun split-quadtree (qt)
   "Split a quadtree into 4 new nodes."
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (with-slots (bounds entries size) qt
     (dolist (new-bound (split-bounds bounds))
       (let ((quad-name (car new-bound))
@@ -45,6 +47,7 @@
     (setf entries nil)))
 
 (defmethod insert ((qt pr-quadtree) new-point new-item)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (with-slots (bounds entries size top-left top-right bottom-left bottom-right) qt
     (when (not (inside-p new-point bounds))
       (error "~a is not inside quadtree bounds." new-point))
@@ -69,6 +72,7 @@
 
 
 (defmethod range-find ((qt pr-quadtree) search-point range)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((find-bound (from-point-range search-point range)))
     (labels
         ((rfind (qt)
