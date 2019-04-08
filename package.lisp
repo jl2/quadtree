@@ -17,7 +17,10 @@
 (defpackage :quadtree
   (:use #:cl #:j-utils #:alexandria #:3d-vectors)
   (:export
-
+   #:*top-left*
+   #:*top-right*
+   #:*bottom-left*
+   #:*bottom-right*
            #:quadtree-bounds
            #:from-point-range
            #:inside-p
@@ -44,11 +47,6 @@
            #:quadrant-of
            #:opposite-quadrant
 
-           #:top-left
-           #:top-right
-           #:bottom-left
-           #:bottom-right
-
            #:make-entry
            #:is-point
            #:remove-value
@@ -56,7 +54,7 @@
            #:contains
            #:view-quadtree
            #:random-quadtree
-
+           #:build-grid-quadtree
            #:parametric-quadtree
            #:parametric-animation
            #:benchmark-random-pr-quadtree-search

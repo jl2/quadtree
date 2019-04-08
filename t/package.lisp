@@ -71,8 +71,7 @@
     (insert qt (vec2 4.0 0.0) 5)
     (insert qt (vec2 5.0 0.0) 6)
     (is-true (= 2 (length (range-find qt (vec2 2.5 0.0) 1.0)))))
-
-  (let* ((qt (build-grid-quadtree 'point-quadtree 5 5))
+  (let* ((qt (build-grid-quadtree 'point-quadtree (from-point-range (vec2 2.5 2.5) 2.5) 5 5))
          (first-results (range-find qt (vec2 2 2) 1.0))
          (second-results (range-find qt (vec2 2.5 2.5) 1.0)))
     (is-true (= 4 (length first-results)))
@@ -137,10 +136,10 @@
 
 
 (test quadrant-of
-  (is-true (eq 'top-left     (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 1.0))))
-  (is-true (eq 'top-right    (quadrant-of (vec2 0.0 0.0) (vec2 1.0 1.0))))
-  (is-true (eq 'bottom-left  (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 -1.0))))
-  (is-true (eq 'bottom-right (quadrant-of (vec2 0.0 0.0) (vec2 1.0 -1.0)))))
+  (is-true (= *top-left*     (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 1.0))))
+  (is-true (= *top-right*    (quadrant-of (vec2 0.0 0.0) (vec2 1.0 1.0))))
+  (is-true (= *bottom-left*  (quadrant-of (vec2 0.0 0.0) (vec2 -1.0 -1.0))))
+  (is-true (= *bottom-right* (quadrant-of (vec2 0.0 0.0) (vec2 1.0 -1.0)))))
 
 (test quadtree-bounds
   (let* ((bounds (from-point-range (vec2 0.0 0.0) 5.0))
@@ -155,10 +154,10 @@
     (is-true  (inside-p (vec2 -2.5 2.5) bounds))
     (is-true  (inside-p (vec2 -2.5 -2.5) bounds))
     (let ((sb (split-bounds bounds)))
-      (is-true (inside-p (vec2 2.5 2.5) (cdr (assoc 'quadtree:top-right sb))))
-      (is-true (inside-p (vec2 -2.5 2.5) (cdr (assoc 'quadtree:top-left sb))))
-      (is-true (inside-p (vec2 2.5 -2.5) (cdr (assoc 'quadtree:bottom-right sb))))
-      (is-true (inside-p (vec2 -2.5 -2.5) (cdr (assoc 'quadtree:bottom-left sb)))))))
+      (is-true (inside-p (vec2 2.5 2.5) (aref sb quadtree:*top-right*)))
+      (is-true (inside-p (vec2 -2.5 2.5) (aref sb quadtree:*top-left*)))
+      (is-true (inside-p (vec2 2.5 -2.5) (aref sb quadtree:*bottom-right*)))
+      (is-true (inside-p (vec2 -2.5 -2.5) (aref sb quadtree:*bottom-left*))))))
 
 
 (test entries
@@ -208,7 +207,7 @@
     (insert qt (vec2 5.0 0.0) 6)
     (is-true (= 2 (length (range-find qt (vec2 2.5 0.0) 1.0)))))
 
-  (let* ((qt (build-grid-quadtree 'pr-quadtree 5 5))
+  (let* ((qt (build-grid-quadtree 'pr-quadtree (from-point-range (vec2 2.5 2.5) 2.5) 5 5))
          (first-results (range-find qt (vec2 2 2) 1.0))
          (second-results (range-find qt (vec2 2.5 2.5) 1.0)))
     (is-true (= 4 (length first-results)))

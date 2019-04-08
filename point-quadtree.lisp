@@ -22,7 +22,7 @@
 
 (defmethod insert ((qt point-quadtree) new-point new-item)
   (declare (optimize (speed 3) (safety 1) (debug 1)))
-  (with-slots (entry size) qt
+  (with-slots (entry children size) qt
     (incf size)
     (cond ((null entry)
            (setf entry (make-entry new-point new-item)))
@@ -32,21 +32,21 @@
 
           (t
            (let ((quad (quadrant-of (slot-value entry 'point) new-point)))
-             (when (null (slot-value qt quad))
-               (setf (slot-value qt quad) (make-instance 'point-quadtree)))
-             (insert (slot-value qt quad) new-point new-item))))))
+             (when (null (aref children quad))
+               (setf (aref children quad) (make-instance 'point-quadtree)))
+             (insert (aref children quad) new-point new-item))))))
 
 (defmethod depth-first ((qt point-quadtree) function)
   (declare (optimize (speed 3) (safety 1) (debug 1)))
-  (with-slots (entry size top-left top-right bottom-left bottom-right) qt
-    (when top-left
-      (depth-first top-left function))
-    (when top-right
-      (depth-first top-right function))
-    (when bottom-right
-      (depth-first bottom-right function))
-    (when bottom-left
-      (depth-first bottom-left function))
+  (with-slots (entry children size) qt
+    (when (aref children *top-left*)
+      (depth-first (aref children *top-left*) function))
+    (when (aref children *top-right*)
+      (depth-first (aref children *top-right*) function))
+    (when (aref children *bottom-right*)
+      (depth-first (aref children *bottom-right*) function))
+    (when (aref children *bottom-left*)
+      (depth-first (aref children *bottom-left*) function))
     (when entry
       (funcall function entry))))
 
@@ -68,14 +68,14 @@
   (let ((bounds (from-point-range search-point range)))
     (labels
         ((rfind (qt)
-           (with-slots (entry size) qt
+           (with-slots (entry children size) qt
              (let* ((quadrants (mapcar (curry #'quadrant-of (slot-value entry 'point))
                                        (bounds-to-points bounds)))
-                    (unique-quads (remove-duplicates quadrants :test #'equal))
+                    (unique-quads (remove-duplicates quadrants :test #'=))
                     (rvals (loop
                               for quad in unique-quads
-                              when (slot-value qt quad)
-                              append (rfind (slot-value qt quad)))))
+                              when (aref children quad)
+                              append (rfind (aref children quad)))))
                (if (inside-p (slot-value entry 'point) bounds)
                  (cons entry rvals)
                  rvals)))))
