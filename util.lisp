@@ -14,14 +14,6 @@
 ;; ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ;; OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-(defun random-quadtree (type radius count)
-  "Create a random quadtree of specified type', with 'count' points within
--radius and radius of the origin along both axes."
-  (let ((qt (make-instance type)))
-    (dotimes (i count)
-      (quadtree:insert qt (vec2-random (- radius) radius) i))
-    qt))
-
 (defun parametric-quadtree (&key
                               (type 'pr-quadtree)
                               (t-min 0.0)
@@ -34,15 +26,13 @@
                                                      :x-max 25.0
                                                      :y-min -25.0
                                                      :y-max 25.0)))
-  "Create a quadtree of specified type, where all of the points lie on the curve
-specified by parametric function (xf(t), yf(t))"
   (let* ((qt (if (eq type 'pr-quadtree)
                  (make-instance 'quadtree:pr-quadtree :bounds bounds)
                  (make-instance type)))
          (dt (/ (- t-max t-min) steps)))
     (loop for i below steps
        for tv = (+ t-min (* dt i))
-       do
+       do 
          (quadtree:insert qt (vec2 (funcall xf tv) (funcall yf tv)) i))
     qt))
 
@@ -63,8 +53,6 @@ specified by parametric function (xf(t), yf(t))"
                                (x-scale 20.0)
                                (y-scale 20.0)
                                (frames 60))
-  "Generate frames of an animation showing quadtree refinement as points are added.
-Animation shows points on a parametric curve, generated using parametric-quadtree."
   (dotimes (i frames)
     (let ((qt (quadtree:parametric-quadtree :t-min t-min
                                             :t-max t-max
@@ -76,13 +64,70 @@ Animation shows points on a parametric curve, generated using parametric-quadtre
           (file-name (format nil "~aframe~5,'0d.png" output-directory i)))
       (quadtree:view-quadtree qt file-name :x-scale x-scale :y-scale y-scale :width width :height height :open-png nil))))
 
-(defun benchmark-quadtree-search ()
+(defun insert-random-points (qt count bounds)
+  (loop
+     for pt in (random-points-in bounds count)
+     do
+       (insert qt pt 0)))
+
+(defun random-quadtree (type radius count)
+  (let* ((bounds (from-point-range (vec2 0.0 0.0) radius))
+         (qt (if (eq type 'point-quadtree)
+                 (make-instance 'point-quadtree)
+                 (make-instance 'pr-quadtree :bounds bounds))))
+    (insert-random-points qt count bounds )
+    qt))
+
+
+
+(defun benchmark-random-pr-quadtree-search ( point-count find-count)
   (dotimes (i 16)
     (let* ((quadtree::*split-size* (* (1+ i) 2))
-           (qt (quadtree:parametric-quadtree)))
-      (dotimes (i 10)
-        (let ((pt (vec2-random -10.0 10.0))
-              (rg (+ 0.1 (random 10.0))))
-          (let ((results (quadtree:range-find qt pt rg )))
-            ))))))
-一
+           (radius 100.0))
+      (format t "Split size: ~a~%Building quadtree of size ~a" quadtree::*split-size* point-count)
+      (let ((qt (time (random-quadtree 'pr-quadtree radius point-count))))
+        (format t "Performing ~a random range-finds~%" find-count)
+        (time
+         (dotimes (i find-count)
+           (let ((pt (vec2-random (- radius) radius))
+                 (rg (+ 0.1 (random radius))))
+             (quadtree:range-find qt pt rg ))))
+        qt))))
+
+(defun benchmark-random-point-quadtree-search ( point-count find-count)
+  (let* ((radius 100.0))
+    (format t "Building quadtree of size ~a" point-count)
+    (let ((qt (time (random-quadtree 'point-quadtree radius point-count))))
+      (format t "Performing ~a random range-finds~%" find-count)
+      (time
+       (dotimes (i find-count)
+         (let ((pt (vec2-random (- radius) radius))
+               (rg (+ 0.1 (random radius))))
+           (quadtree:range-find qt pt rg ))))
+      qt)))
+
+(defun build-grid-quadtree (type bounds x-count y-count)
+  (with-slots (x-min x-max y-min y-max) bounds
+    (let ((qt (if (equal type 'point-quadtree)
+                (make-instance 'point-quadtree)
+                (make-instance 'pr-quadtree :bounds bounds)))
+          (dx (/ (- x-max x-min) x-count))
+          (dy (/ (- y-max x-min) y-count)))
+      (dotimes (i x-count)
+        (let ((x-value (+ x-min (* dx i))))
+          (dotimes (j y-count)
+            (let ((y-value (+ y-min (* dy j))))
+              (insert qt (vec2 x-value y-value) 0)))))
+      qt)))
+(defun benchmark-grid-quadtree-search (x-count y-count find-count)
+  (let* ((radius 100.0)
+         (bounds (from-point-range (vec2 0.0 0.0) radius))
+         (pt-qt (build-grid-quadtree 'point-quadtree bounds x-count y-count))
+         (pr-qt (build-grid-quadtree 'pr-quadtree bounds x-count y-count)))
+    (dotimes (i find-count)
+      (let* ((pt (vec2-random (- radius) radius))
+            (rg (+ 0.1 (random radius)))
+            (pt-find (quadtree:range-find pt-qt pt rg ))
+            (pr-find (quadtree:range-find pr-qt pt rg )))
+        (assert (= (length pt-find) (length pr-find)))))
+    (values pt-qt pr-qt)))

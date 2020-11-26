@@ -16,18 +16,25 @@
 
 (in-package :quadtree)
 
+(defparameter *top-left* 0)
+(defparameter *top-right* 1)
+(defparameter *bottom-left* 2)
+(defparameter *bottom-right* 3)
+
 (defclass quadtree ()
-  (
-   (size :initform 0 :type fixnum)
-   (top-left :initform nil :type (or null quadtree))
-   (top-right :initform nil :type (or null quadtree))
-   (bottom-left :initform nil :type (or null quadtree))
-   (bottom-right :initform nil :type (or null quadtree)))
+  ((size :initform 0 :type fixnum)
+   (children :initform (make-array 4 :element-type '(or null quadtree::quadtree) :initial-element nil) :type (simple-vector 4))
+   ;; (top-left :initform nil :type (or null quadtree))
+   ;; (top-right :initform nil :type (or null quadtree))
+   ;; (bottom-left :initform nil :type (or null quadtree))
+   ;; (bottom-right :initform nil :type (or null quadtree))
+   )
   (:documentation "A QuadTree class."))
 
 (defgeneric qsize (qt)
   (:documentation "Returns the number of points in the quadtree."))
 
+(declaim (inline insert locate depth-first closest range-find remove-item remove-from qsize))
 (defgeneric insert (qt point new-item)
   (:documentation "Inserts item into qt at point.  Duplicates are allowed."))
 
@@ -66,27 +73,26 @@
   "Returns the quadrant of pt relative to root."
   (cond ((and (< (vx pt) (vx root))
               (>= (vy pt) (vy root)))
-         'top-left)
+         *top-left*)
         ((and (< (vx pt) (vx root))
               (< (vy pt) (vy root)))
-         'bottom-left)
+         *bottom-left*)
         ((and (>= (vx pt) (vx root))
               (>= (vy pt) (vy root)))
-         'top-right)
+         *top-right*)
         ((and (>= (vx pt) (vx root))
               (< (vy pt) (vy root)))
-         'bottom-right)))
+         *bottom-right*)))
 
 (defun opposite-quadrant (quad)
   "Returns the quadrant 180 degrees from quad."
-  (cond ((eq quad 'top-left)
-         'bottom-right)
-        ((eq quad 'top-right)
-         'bottom-left)
-        ((eq quad 'bottom-left)
-         'top-right)
-        ((eq quad 'bottom-right)
-         'top-left)
+  (cond ((eq quad *top-left*)
+         *bottom-right*)
+        ((eq quad *top-right*)
+         *bottom-left*)
+        ((eq quad *bottom-left*)
+         *top-right*)
+        ((eq quad *bottom-right*)
+         *top-left*)
         (t (error "Unknown quadrant! ~a" quad))))
-
 

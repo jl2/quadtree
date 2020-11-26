@@ -16,14 +16,25 @@
 
 (defpackage :quadtree
   (:use #:cl #:j-utils #:alexandria #:3d-vectors)
-  (:export #:split-size
-           #:point-quadtree
-           #:pr-quadtree
+  (:export
+   #:*top-left*
+   #:*top-right*
+   #:*bottom-left*
+   #:*bottom-right*
            #:quadtree-bounds
            #:from-point-range
            #:inside-p
            #:bounds-to-points
            #:split-bounds
+           #:random-point-in
+           #:random-points-in
+
+           #:split-size
+
+           #:quadtree
+           #:point-quadtree
+           #:pr-quadtree
+
            #:qsize
            #:locate
            #:closest
@@ -31,13 +42,11 @@
            #:depth-first
            #:remove-item
            #:remove-from
+           #:range-find
+
            #:quadrant-of
            #:opposite-quadrant
-           #:top-left
-           #:top-right
-           #:bottom-left
-           #:bottom-right
-           #:range-find
+
            #:make-entry
            #:is-point
            #:remove-value
@@ -45,5 +54,9 @@
            #:contains
            #:view-quadtree
            #:random-quadtree
+           #:build-grid-quadtree
            #:parametric-quadtree
-           #:parametric-animation))
+           #:parametric-animation
+           #:benchmark-random-pr-quadtree-search
+           #:benchmark-random-point-quadtree-search
+           #:benchmark-grid-quadtree-search))

@@ -48,22 +48,38 @@
           (vec2 x-max y-min)
           (vec2 x-max y-max))))
 
+(defun random-point-in (bounds)
+  "Return a list of four boundary points."
+  (with-slots (x-min y-min x-max y-max) bounds
+    (vec2 (+ x-min (* (- x-max x-min) (random 1.0)))
+          (+ y-min (* (- y-max y-min) (random 1.0))))))
+
+(defun random-points-in (bounds count)
+  "Return a list of four boundary points."
+  (with-slots (x-min y-min x-max y-max) bounds
+    (loop for i below count collecting
+         (vec2 (+ x-min (* (- x-max x-min) (random 1.0)))
+               (+ y-min (* (- y-max y-min) (random 1.0)))))))
+
 (defun split-bounds (bounds)
   (with-slots (x-min x-max y-min y-max) bounds
     (let ((x-mid (/ (+ x-max x-min) 2))
           (y-mid (/ (+ y-max y-min) 2)))
-      (list (cons 'top-left (make-instance 'quadtree-bounds
-                                              :x-min x-min :x-max x-mid
-                                              :y-min y-mid :y-max y-max))
-            (cons 'top-right (make-instance 'quadtree-bounds
-                                               :x-min x-mid :x-max x-max
-                                               :y-min y-mid :y-max y-max))
-            (cons 'bottom-left (make-instance 'quadtree-bounds
-                                           :x-min x-min :x-max x-mid
-                                           :y-min y-min :y-max y-mid))
-            (cons 'bottom-right (make-instance 'quadtree-bounds
-                                            :x-min x-mid :x-max x-max
-                                            :y-min y-min :y-max y-mid))))))
+      (make-array 4
+                  :initial-contents
+                  (list 
+                   (make-instance 'quadtree-bounds
+                                  :x-min x-min :x-max x-mid
+                                  :y-min y-mid :y-max y-max)
+                   (make-instance 'quadtree-bounds
+                                  :x-min x-mid :x-max x-max
+                                  :y-min y-mid :y-max y-max)
+                   (make-instance 'quadtree-bounds
+                                  :x-min x-min :x-max x-mid
+                                  :y-min y-min :y-max y-mid)
+                   (make-instance 'quadtree-bounds
+                                  :x-min x-mid :x-max x-max
+                                  :y-min y-min :y-max y-mid))))))
 
 (defmethod print-object ((bound quadtree-bounds) stream)
   (with-slots (x-min y-min x-max y-max) bound
