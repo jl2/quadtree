@@ -27,5 +27,6 @@
                (:file "quadtree")
                (:file "point-quadtree")
                (:file "pr-quadtree")
+               (:file "util")
                (:file "visualization"))
   :in-order-to ((test-op (test-op quadtree.test))))
