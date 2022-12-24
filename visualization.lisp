@@ -58,8 +58,9 @@
 ;;        |       |
 ;;        |       |
 ;; -------+-------|
-;;        |       |
-;;        |       |
+;;        |   |   |
+;;        |---+---|
+;;        |   |   |
 
 (defmethod view-quadtree ((qt point-quadtree)
                           png-file-name
@@ -69,7 +70,6 @@
                             (x-scale 1.0)
                             (y-scale 1.0)
                             (line-width 1.5))
-  "Test writing a PNG file with Cairo."
   (let ((real-file-name (home-dir png-file-name))
         (half-width (/ width 2.0))
         (half-height (/ height 2.0)))
@@ -134,7 +134,6 @@
                             (x-scale 1.0)
                             (y-scale 1.0)
                             (line-width 1.5))
-  "Test writing a PNG file with Cairo."
   (let ((real-file-name (home-dir png-file-name))
         (half-width (/ width 2.0))
         (half-height (/ height 2.0)))

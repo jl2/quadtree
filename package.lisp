@@ -21,42 +21,42 @@
    #:*top-right*
    #:*bottom-left*
    #:*bottom-right*
-           #:quadtree-bounds
-           #:from-point-range
-           #:inside-p
-           #:bounds-to-points
-           #:split-bounds
-           #:random-point-in
-           #:random-points-in
+   #:quadtree-bounds
+   #:from-point-range
+   #:inside-p
+   #:bounds-to-points
+   #:split-bounds
+   #:random-point-in
+   #:random-points-in
 
-           #:split-size
+   #:split-size
 
-           #:quadtree
-           #:point-quadtree
-           #:pr-quadtree
+   #:quadtree
+   #:point-quadtree
+   #:pr-quadtree
 
-           #:qsize
-           #:locate
-           #:closest
-           #:insert
-           #:depth-first
-           #:remove-item
-           #:remove-from
-           #:range-find
+   #:qsize
+   #:locate
+   #:closest
+   #:insert
+   #:depth-first
+   #:remove-item
+   #:remove-from
+   #:range-find
 
-           #:quadrant-of
-           #:opposite-quadrant
+   #:quadrant-of
+   #:opposite-quadrant
 
-           #:make-entry
-           #:is-point
-           #:remove-value
-           #:add-value
-           #:contains
-           #:view-quadtree
-           #:random-quadtree
-           #:build-grid-quadtree
-           #:parametric-quadtree
-           #:parametric-animation
-           #:benchmark-random-pr-quadtree-search
-           #:benchmark-random-point-quadtree-search
-           #:benchmark-grid-quadtree-search))
+   #:make-entry
+   #:is-point
+   #:remove-value
+   #:add-value
+   #:contains
+   #:view-quadtree
+   #:random-quadtree
+   #:build-grid-quadtree
+   #:parametric-quadtree
+   #:parametric-animation
+   #:benchmark-random-pr-quadtree-search
+   #:benchmark-random-point-quadtree-search
+   #:benchmark-grid-quadtree-search))

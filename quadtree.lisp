@@ -95,4 +95,3 @@
         ((eq quad *bottom-right*)
          *top-left*)
         (t (error "Unknown quadrant! ~a" quad))))
-
