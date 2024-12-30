@@ -14,6 +14,8 @@
 ;; ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 ;; OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+(in-package :quadtree)
+
 (defun parametric-quadtree (&key
                               (type 'pr-quadtree)
                               (t-min 0.0)
@@ -119,6 +121,7 @@
             (let ((y-value (+ y-min (* dy j))))
               (insert qt (vec2 x-value y-value) 0)))))
       qt)))
+
 (defun benchmark-grid-quadtree-search (x-count y-count find-count)
   (let* ((radius 100.0)
          (bounds (from-point-range (vec2 0.0 0.0) radius))
@@ -126,8 +129,9 @@
          (pr-qt (build-grid-quadtree 'pr-quadtree bounds x-count y-count)))
     (dotimes (i find-count)
       (let* ((pt (vec2-random (- radius) radius))
-            (rg (+ 0.1 (random radius)))
-            (pt-find (quadtree:range-find pt-qt pt rg ))
-            (pr-find (quadtree:range-find pr-qt pt rg )))
+             (rg (+ 0.1 (random radius)))
+             (pt-find (quadtree:range-find pt-qt pt rg ))
+             (pr-find (quadtree:range-find pr-qt pt rg )))
         (assert (= (length pt-find) (length pr-find)))))
     (values pt-qt pr-qt)))
+

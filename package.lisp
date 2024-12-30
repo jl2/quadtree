@@ -15,7 +15,7 @@
 ;; OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 (defpackage :quadtree
-  (:use #:cl #:j-utils #:alexandria #:3d-vectors)
+  (:use #:cl #:alexandria #:3d-vectors)
   (:export
    #:*top-left*
    #:*top-right*

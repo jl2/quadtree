@@ -34,7 +34,7 @@
 (defgeneric qsize (qt)
   (:documentation "Returns the number of points in the quadtree."))
 
-(declaim (inline insert locate depth-first closest range-find remove-item remove-from qsize))
+(declaim (inline locate depth-first closest range-find remove-item remove-from qsize))
 (defgeneric insert (qt point new-item)
   (:documentation "Inserts item into qt at point.  Duplicates are allowed."))
 

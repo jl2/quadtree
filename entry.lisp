@@ -17,7 +17,7 @@
 (in-package :quadtree)
 
 (defclass quadtree-entry ()
-  ((point :initarg :point :type vec2)
+  ((point :initarg :point :type (or vec2 vec3))
    (data :initarg :data :type (or null cons))))
 
 (defmethod print-object ((entry quadtree-entry) stream)

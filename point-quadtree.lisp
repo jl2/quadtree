@@ -69,16 +69,17 @@
     (labels
         ((rfind (qt)
            (with-slots (entry children size) qt
-             (let* ((quadrants (mapcar (curry #'quadrant-of (slot-value entry 'point))
-                                       (bounds-to-points bounds)))
-                    (unique-quads (remove-duplicates quadrants :test #'=))
-                    (rvals (loop
-                              for quad in unique-quads
-                              when (aref children quad)
-                              append (rfind (aref children quad)))))
-               (if (inside-p (slot-value entry 'point) bounds)
-                 (cons entry rvals)
-                 rvals)))))
+             (with-slots (point) entry
+               (let* ((quadrants (mapcar (curry #'quadrant-of point)
+                                         (bounds-to-points bounds)))
+                      (unique-quads (remove-duplicates quadrants :test #'=))
+                      (rvals (loop
+                               :for quad :in unique-quads
+                               :when (aref children quad)
+                                 :append (rfind (aref children quad)))))
+                 (if (inside-p point bounds)
+                     (cons entry rvals)
+                     rvals))))))
       (rfind qt))))
 
 (defmethod remove-item ((qt point-quadtree) item test)

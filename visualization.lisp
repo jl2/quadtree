@@ -124,7 +124,7 @@
                                          :y-min -1000.0
                                          :y-max 1000.0))))
     (when open-png
-      (swank:eval-in-emacs (list 'find-file-other-window (namestring real-file-name))))))
+      (swank:eval-in-emacs `(find-file-other-window ,(namestring real-file-name) t)))))
 
 (defmethod view-quadtree ((qt pr-quadtree)
                           png-file-name
@@ -160,4 +160,4 @@
                     (draw-quadtree sub-tree)))))
         (draw-quadtree qt)))
     (when open-png
-      (swank:eval-in-emacs (list 'find-file-other-window (namestring real-file-name))))))
+      (swank:eval-in-emacs `(find-file-other-window ,(namestring real-file-name) t)))))

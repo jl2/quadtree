@@ -20,7 +20,7 @@
   :license  "ISC"
   :version "0.0.1"
   :serial t
-  :depends-on (#:3d-vectors #:j-utils #:alexandria #:cl-cairo2)
+  :depends-on (#:3d-vectors #:alexandria #:cl-cairo2)
   :components ((:file "package")
                (:file "entry")
                (:file "bounds")

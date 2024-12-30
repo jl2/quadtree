@@ -16,12 +16,30 @@
 
 (in-package :quadtree)
 
+(declaim (optimize (speed 1) (safety 3) (debug 3)))
+
 (defclass quadtree-bounds ()
-  ((x-min :initarg :x-min :initform -1000.0 :type double-float)
-   (x-max :initarg :x-max :initform 1000.0 :type double-float)
-   (y-min :initarg :y-min :initform -1000.0 :type double-float)
-   (y-max :initarg :y-max :initform 1000.0 :type double-float))
+  ((x-min :initarg :x-min
+          :initform -1000.0
+          :type number)
+   (x-max :initarg :x-max
+          :initform 1000.0
+          :type number)
+   (y-min :initarg :y-min
+          :initform -1000.0
+          :type number)
+   (y-max :initarg :y-max
+          :initform 1000.0
+          :type number))
   (:documentation "Quadtree node boundary"))
+
+(defmethod print-object ((bound quadtree-bounds) stream)
+  (declare (type stream stream))
+  (with-slots (x-min y-min x-max y-max) bound
+    (format stream
+            "(make-bounds :x-min ~a :y-min ~a :x-max ~a :y-max ~a)"
+            x-min y-min
+            x-max y-max)))
 
 (declaim (inline from-point-range inside-p bounds-to-points midpoint))
 (defun from-point-range (point range)
@@ -81,9 +99,6 @@
                                   :x-min x-mid :x-max x-max
                                   :y-min y-min :y-max y-mid))))))
 
-(defmethod print-object ((bound quadtree-bounds) stream)
-  (with-slots (x-min y-min x-max y-max) bound
-    (format stream "(make-bounds :x-min ~a :y-min ~a :x-max ~a :y-max ~a)" x-min y-min x-max y-max)))
 
 (defun midpoint (bounds)
   (with-slots (x-min y-min x-max y-max) bounds
